@@ -26,7 +26,11 @@ export default function App() {
         ))}
         <button onClick={() => setQuestionsOpen(true)} className="text-meta">questions</button>
       </nav>
-      <Screen />
+      {view === 'brief' ? (
+        <Brief onOpenQuestions={() => setQuestionsOpen(true)} />
+      ) : (
+        <Screen />
+      )}
       {questionsOpen && <QuestionsPanel onClose={() => setQuestionsOpen(false)} />}
     </div>
   )
