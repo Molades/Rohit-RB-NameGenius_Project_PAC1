@@ -20,14 +20,14 @@ export const compareItems = [
 ]
 
 export const QUESTIONS = [
-  { q: 'What feeling do you want to evoke in your audience?', a: '' },
-  { q: 'What are the main actions you want people to take?', a: '' },
-  { q: 'If your company were a rare plant or animal, which would it be?', a: '' },
-  { q: 'What analogies fit how your business operates?', a: '' },
-  { q: 'How would you explain your project to a five-year-old and keep them interested?', a: '' },
-  { q: 'Does this concept exist in other industries, and do they use different words for it?', a: '' },
-  { q: 'What are a few good metaphors for what you do?', a: '' },
-  { q: "What role in people's lives are you trying to fill?", a: '' },
+  { q: 'What feeling do you want to evoke in your audience?', a: 'Grounded confidence, quiet craft.' },
+  { q: 'What are the main actions you want people to take?', a: 'Book a consult, browse the catalog.' },
+  { q: 'If your company were a rare plant or animal, which would it be?', a: 'A bristlecone pine — old, tough, unhurried.' },
+  { q: 'What analogies fit how your business operates?', a: 'Like a woodworking apprenticeship: slow, hands-on.' },
+  { q: 'How would you explain your project to a five-year-old and keep them interested?', a: 'We fix broken chairs so they last forever.' },
+  { q: 'Does this concept exist in other industries, and do they use different words for it?', a: 'Restoration, in the same way old cars get restored.' },
+  { q: 'What are a few good metaphors for what you do?', a: 'Heirloom, not inventory.' },
+  { q: "What role in people's lives are you trying to fill?", a: 'The furniture that outlasts the move.' },
 ]
 
 export const brief = {

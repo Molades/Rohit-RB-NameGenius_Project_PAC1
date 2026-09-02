@@ -3,8 +3,8 @@ import { results, brief } from '../data.js'
 
 export default function Results() {
   return (
-    <main className="flex justify-center bg-canvas px-16 py-16">
-      <div className="flex w-[1039px] flex-col gap-7">
+    <main className="flex justify-center bg-canvas px-6 py-10 sm:px-16 sm:py-16">
+      <div className="flex w-full max-w-[1039px] flex-col gap-7">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-[20px] font-bold leading-[24px] tracking-[-0.2px] text-ink">
             5 names for {brief.name}

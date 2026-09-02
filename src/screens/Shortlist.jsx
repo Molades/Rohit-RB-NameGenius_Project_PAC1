@@ -2,8 +2,8 @@ import { shortlist } from '../data.js'
 
 export default function Shortlist() {
   return (
-    <main className="flex justify-center bg-canvas px-16 py-16">
-      <div className="flex w-[600px] flex-col gap-6">
+    <main className="flex justify-center bg-canvas px-6 py-10 sm:px-16 sm:py-16">
+      <div className="flex w-full max-w-[600px] flex-col gap-6">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-[28px] font-bold leading-[30px] tracking-[-0.4px] text-ink">
             Shortlist

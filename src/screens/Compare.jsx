@@ -11,7 +11,7 @@ function Row({ label, value }) {
 
 export default function Compare() {
   return (
-    <main className="flex justify-center bg-canvas px-16 py-16">
+    <main className="flex justify-center bg-canvas px-6 py-10 sm:px-16 sm:py-16">
       <div className="flex flex-col gap-6">
         <h1 className="font-display text-[28px] font-bold leading-[30px] tracking-[-0.4px] text-ink">
           Compare
