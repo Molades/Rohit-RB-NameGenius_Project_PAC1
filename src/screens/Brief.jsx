@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { brief as initialBrief } from '../data.js'
 
 function TextField({ label, value, onChange, multiline }) {
   const Tag = multiline ? 'textarea' : 'input'
@@ -18,11 +17,13 @@ function TextField({ label, value, onChange, multiline }) {
   )
 }
 
-export default function Brief({ onOpenQuestions } = {}) {
-  const [name, setName] = useState(initialBrief.name)
-  const [description, setDescription] = useState(initialBrief.description)
-  const [competitors, setCompetitors] = useState(initialBrief.competitors)
-  const [tld, setTld] = useState(initialBrief.tld)
+export default function Brief({ initial, onFindNames, onOpenQuestions }) {
+  const [name, setName] = useState(initial.name)
+  const [description, setDescription] = useState(initial.description)
+  const [competitors, setCompetitors] = useState(initial.competitors)
+  const [tld, setTld] = useState(initial.tld)
+
+  const canSubmit = name.trim() || description.trim() || competitors.trim()
 
   return (
     <main className="flex justify-center bg-canvas px-6 py-10 sm:px-16 sm:py-16">
@@ -49,10 +50,15 @@ export default function Brief({ onOpenQuestions } = {}) {
           ))}
         </div>
         <div className="flex items-center gap-5">
-          <button className="bg-ink px-7 py-4 font-display text-[16px] font-semibold text-paper">
+          <button
+            type="button"
+            disabled={!canSubmit}
+            onClick={() => onFindNames({ name, description, competitors, tld })}
+            className="bg-ink px-7 py-4 font-display text-[16px] font-semibold text-paper disabled:cursor-not-allowed disabled:opacity-40"
+          >
             Find names
           </button>
-          <button onClick={onOpenQuestions} className="font-meta text-[12px] font-semibold text-ink">
+          <button type="button" onClick={onOpenQuestions} className="font-meta text-[12px] font-semibold text-ink">
             Sharpen with brand questions →
           </button>
         </div>

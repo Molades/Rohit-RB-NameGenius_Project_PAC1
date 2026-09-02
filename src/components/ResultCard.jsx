@@ -40,8 +40,14 @@ export default function ResultCard({
   tld = '.com',
   state = 'available',
   className = '',
+  onCopy,
+  onToggleShortlist,
+  isShortlisted = false,
+  onToggleCompare,
+  isCompared = false,
 }) {
   const s = STATES[state] ?? STATES.available
+  const hasActions = onCopy || onToggleShortlist || onToggleCompare
 
   return (
     <div
@@ -69,6 +75,38 @@ export default function ResultCard({
           </p>
         </div>
       </div>
+
+      {hasActions && (
+        <div className="flex w-full items-center gap-[16px] border-t border-[#e5e5e5] pt-[12px] font-meta text-[11px] font-semibold">
+          {onCopy && (
+            <button
+              type="button"
+              onClick={() => onCopy(`${domain}${tld}`)}
+              className="text-[#4a4a4a] hover:text-[#0a0a0a]"
+            >
+              Copy
+            </button>
+          )}
+          {onToggleShortlist && (
+            <button
+              type="button"
+              onClick={onToggleShortlist}
+              className={isShortlisted ? 'text-[#0a0a0a]' : 'text-[#4a4a4a] hover:text-[#0a0a0a]'}
+            >
+              {isShortlisted ? 'Shortlisted ✓' : 'Shortlist'}
+            </button>
+          )}
+          {onToggleCompare && (
+            <button
+              type="button"
+              onClick={onToggleCompare}
+              className={isCompared ? 'text-[#0a0a0a]' : 'text-[#4a4a4a] hover:text-[#0a0a0a]'}
+            >
+              {isCompared ? 'Comparing ✓' : 'Compare'}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
