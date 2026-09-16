@@ -1,0 +1,57 @@
+const GEMINI_MODEL = 'gemini-flash-latest'
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
+
+function buildPrompt(brief, excludeNames) {
+  const lines = [
+    'Suggest 8 short, ordinary business name ideas for a brand.',
+    brief.name ? `Working name so far: ${brief.name}` : null,
+    brief.description ? `Description: ${brief.description}` : null,
+    brief.competitors ? `Competitors/keywords: ${brief.competitors}` : null,
+    excludeNames.length ? `Do not repeat any of these: ${excludeNames.join(', ')}` : null,
+    'Respond with ONLY a JSON array of 8 short strings, no other text.',
+  ].filter(Boolean)
+  return lines.join('\n')
+}
+
+export async function generateNames(brief, excludeNames = []) {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+  const res = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: buildPrompt(brief, excludeNames) }] }],
+    }),
+  })
+
+  if (!res.ok) {
+    let body = null
+    try {
+      body = await res.json()
+    } catch {
+      // non-JSON error body — fall through to the generic error below
+    }
+    if (res.status === 429 && body?.error?.status === 'RESOURCE_EXHAUSTED') {
+      const err = new Error('Gemini daily quota exhausted')
+      err.code = 'QUOTA_EXCEEDED'
+      throw err
+    }
+    throw new Error(body?.error?.message || `Gemini API error (${res.status})`)
+  }
+
+  const data = await res.json()
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  const match = text.match(/\[[\s\S]*\]/)
+  if (!match) throw new Error("Couldn't parse name ideas from Gemini's response.")
+
+  let names
+  try {
+    names = JSON.parse(match[0])
+  } catch {
+    throw new Error("Couldn't parse name ideas from Gemini's response.")
+  }
+  if (!Array.isArray(names) || names.length === 0) {
+    throw new Error('Gemini returned no name ideas.')
+  }
+
+  return names.slice(0, 8).map((n) => String(n).trim()).filter(Boolean)
+}
