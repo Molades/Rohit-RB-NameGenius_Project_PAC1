@@ -44,8 +44,8 @@ export default function Compare({ compareSel, onRemove, onNavigate }) {
                     Remove
                   </button>
                 </div>
-                <Row label="Domain status" value={item.state === 'available' ? 'Available' : 'Taken'} />
-                <Row label="TLD" value={`${item.domain}${item.tld}`} />
+                <Row label="Domain status" value={item.status === 'available' ? 'Available' : 'Taken'} />
+                <Row label="Domain" value={item.domain} />
               </div>
             ))}
           </div>

@@ -7,6 +7,10 @@ import QuestionsPanel from './screens/QuestionsPanel.jsx'
 import { CANDIDATE_POOL, INITIAL_BRIEF, QUESTIONS, pickBatch } from './data.js'
 
 const REGENS_BEFORE_QUESTION = 3
+// Mocked domain-check delay + failure rate — stands in for the real RDAP call's
+// loading/error states (Phase 3) without an actual network request.
+const CHECK_DELAY_MS = 700
+const SIMULATED_FAILURE_RATE = 0.15
 
 export default function App() {
   const [view, setView] = useState('brief')
@@ -14,6 +18,8 @@ export default function App() {
 
   const [brief, setBrief] = useState(INITIAL_BRIEF)
   const [results, setResults] = useState(() => pickBatch(CANDIDATE_POOL))
+  const [isChecking, setIsChecking] = useState(false)
+  const [error, setError] = useState(null)
   const [filters, setFilters] = useState({ tld: 'any', length: 'any' })
   const [shortlist, setShortlist] = useState([])
   const [compareSel, setCompareSel] = useState([])
@@ -26,28 +32,51 @@ export default function App() {
     return idx === -1 ? null : idx
   }
 
+  // Every batch fetch (first generation, regenerate, or answering a follow-up)
+  // goes through here: a brief "checking" state, then either a fresh batch or
+  // a simulated failure — the same shape a real RDAP call would have.
+  const runBatch = (excludeDomains, onSuccess) => {
+    setIsChecking(true)
+    setError(null)
+    setTimeout(() => {
+      if (Math.random() < SIMULATED_FAILURE_RATE) {
+        setError('Domain check failed. Try again.')
+        setIsChecking(false)
+        return
+      }
+      setResults(pickBatch(CANDIDATE_POOL, excludeDomains))
+      setIsChecking(false)
+      onSuccess?.()
+    }, CHECK_DELAY_MS)
+  }
+
   const findNames = (values) => {
     setBrief(values)
-    setResults(pickBatch(CANDIDATE_POOL))
     setFilters({ tld: 'any', length: 'any' })
     setRegenCount(0)
     setPendingQuestion(null)
     setView('results')
+    runBatch([])
+  }
+
+  const retry = () => {
+    runBatch(results.map((r) => r.domain))
   }
 
   const regenerate = () => {
     if (pendingQuestion !== null) return
-    setResults((prev) => pickBatch(CANDIDATE_POOL, prev.map((r) => r.domain)))
-    setRegenCount((n) => {
-      const next = n + 1
-      if (next >= REGENS_BEFORE_QUESTION) {
-        const idx = firstUnanswered(answers)
-        if (idx !== null) {
-          setPendingQuestion(idx)
-          return 0
+    runBatch(results.map((r) => r.domain), () => {
+      setRegenCount((n) => {
+        const next = n + 1
+        if (next >= REGENS_BEFORE_QUESTION) {
+          const idx = firstUnanswered(answers)
+          if (idx !== null) {
+            setPendingQuestion(idx)
+            return 0
+          }
         }
-      }
-      return next
+        return next
+      })
     })
   }
 
@@ -76,7 +105,7 @@ export default function App() {
   const answerFollowUp = (index, value) => {
     saveAnswer(index, value)
     setPendingQuestion(null)
-    setResults((prev) => pickBatch(CANDIDATE_POOL, prev.map((r) => r.domain)))
+    runBatch(results.map((r) => r.domain))
   }
 
   const skipFollowUp = () => setPendingQuestion(null)
@@ -107,6 +136,9 @@ export default function App() {
         <Results
           brief={brief}
           results={results}
+          isChecking={isChecking}
+          error={error}
+          onRetry={retry}
           filters={filters}
           onFiltersChange={setFilters}
           shortlist={shortlist}

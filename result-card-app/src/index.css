@@ -21,6 +21,19 @@
   --spacing-6: 24px;
   --spacing-8: 32px;
   --spacing-16: 64px;
+
+  /* Phase 1 card only (ResultCard.jsx) — pulled from s3-card-app's Figma frame
+     "nimbusly-domain-card" (node 248:670). Namespaced/renamed where a name would
+     otherwise collide with the app's own tokens above: font-card-display (not
+     font-display, which is Outfit here) and color-card-muted (not color-muted,
+     which is #4a4a4a here vs. this card's #8a8a8a). */
+  --font-card-display: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+  --color-surface: #fef7ff;
+  --color-on-surface: #1d1b20;
+  --color-outline-variant: #cac4d0;
+  --color-card-muted: #8a8a8a;
+  --color-taken: #c0c0c0;
 }
 
 html, body, #root { height: 100%; }

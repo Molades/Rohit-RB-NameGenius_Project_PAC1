@@ -4,7 +4,7 @@ export default function Shortlist({ shortlist, onRemove, onNavigate }) {
   const [copied, setCopied] = useState(false)
 
   const copyList = async () => {
-    const text = shortlist.map((s) => `${s.domain}${s.tld}`).join('\n')
+    const text = shortlist.map((s) => s.domain).join('\n')
     try {
       await navigator.clipboard.writeText(text)
     } catch {
@@ -51,10 +51,7 @@ export default function Shortlist({ shortlist, onRemove, onNavigate }) {
               <div key={item.domain} className="flex items-center justify-between border-b border-border py-4">
                 <div className="flex flex-col gap-0.5">
                   <p className="font-meta text-[14px] font-semibold text-ink">{item.name}</p>
-                  <p className="font-meta text-[12px] text-meta">
-                    {item.domain}
-                    {item.tld}
-                  </p>
+                  <p className="font-meta text-[12px] text-meta">{item.domain}</p>
                 </div>
                 <button
                   type="button"

@@ -1,108 +1,138 @@
+import { CircleIndicator, CopyIcon, FavoriteIcon, SettingsIcon } from '../assets/icons.jsx'
+
 /**
- * ResultCard — one component, three states driven by the `state` prop.
+ * ResultCard — the Phase 1 card, pulled in from s3-card-app as this app's
+ * shared component. One component, three states via the `status` prop.
  *
- * Values are taken from the Figma component set `result-card` (node 95:88):
- * card 333px wide, 24px padding, 12px gap, 1px #e5e5e5 border, no radius.
- * Layout is identical in every state — only the status label and a
- * zero-layout treatment on the domain change — so the card cannot reflow
- * when the availability check resolves.
+ * Every size, weight, tracking, color, and gap below is pulled from the Figma
+ * frame "nimbusly-domain-card" (node 248:670) via get_design_context, not
+ * eyeballed. That frame only shows the `taken` state — the `available` and
+ * `loading` treatments extend its token language (same badge shape, same
+ * grays) rather than introducing new ones. Layout is identical across all
+ * three states; only color, border style, and text content change, so the
+ * card cannot reflow when a domain check resolves.
+ *
+ * Tokens are namespaced (font-card-display, color-card-muted) in index.css
+ * where a name would otherwise collide with the app's own Outfit/Instrument
+ * Sans + ink/paper tokens used elsewhere (Brief, nav) — see index.css.
  */
 
-const STATES = {
+const STATUS = {
   available: {
     label: 'AVAILABLE',
-    labelColor: 'text-[#0a0a0a]',
-    sldColor: 'text-[#737373]',
-    tldColor: 'text-[#171717]',
-    struck: false,
+    badgeClass: 'border-on-surface bg-on-surface',
+    dotClass: 'text-surface',
+    labelClass: 'text-surface',
+    domainClass: 'text-on-surface',
   },
   taken: {
     label: 'TAKEN',
-    labelColor: 'text-[#4a4a4a]',
-    sldColor: 'text-[#737373]',
-    tldColor: 'text-[#171717]',
-    struck: true,
+    badgeClass: 'border-taken bg-transparent',
+    dotClass: 'text-card-muted',
+    labelClass: 'text-card-muted',
+    domainClass:
+      'text-card-muted line-through decoration-solid [text-decoration-skip-ink:none] [text-underline-position:from-font]',
   },
   loading: {
     label: 'CHECKING',
-    labelColor: 'text-[#757575]',
-    // Deliberately below the 4.5:1 contrast floor: a pending value
-    // is not yet meant to be read.
-    sldColor: 'text-[#9a9a9a]',
-    tldColor: 'text-[#9a9a9a]',
-    struck: false,
+    badgeClass: 'border-dashed border-outline-variant bg-transparent',
+    dotClass: 'text-card-muted animate-pulse',
+    labelClass: 'text-card-muted',
+    domainClass: 'text-card-muted',
   },
 }
 
 export default function ResultCard({
   name,
   domain,
-  tld = '.com',
-  state = 'available',
-  className = '',
+  status = 'available',
+  tlds = [],
   onCopy,
   onToggleShortlist,
   isShortlisted = false,
   onToggleCompare,
   isCompared = false,
 }) {
-  const s = STATES[state] ?? STATES.available
+  const s = STATUS[status] ?? STATUS.available
+  const isLoading = status === 'loading'
   const hasActions = onCopy || onToggleShortlist || onToggleCompare
 
   return (
-    <div
-      className={`flex w-[333px] flex-col items-start gap-[12px] border border-solid border-[#e5e5e5] bg-white p-[24px] ${className}`}
-    >
-      <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap font-display text-[28px] font-bold leading-[30px] tracking-[-0.4px] text-[#0a0a0a]">
+    <div className="flex w-[530px] flex-col items-start gap-[20px] rounded-[12px] border border-outline-variant bg-surface px-[36px] py-[32px]">
+      {/* header-section */}
+      <p className="w-full break-words font-card-display text-[44px] font-extrabold leading-none tracking-[-1px] text-on-surface">
         {name}
       </p>
 
-      <div className="flex w-full items-baseline justify-between gap-[12px] overflow-hidden">
-        <p
-          className={`min-w-0 flex-1 overflow-hidden whitespace-nowrap font-meta text-[12px] leading-[20px] ${
-            s.struck ? 'line-through' : ''
-          }`}
-        >
-          <span className={`font-normal ${s.sldColor}`}>{domain}</span>
-          <span className={`font-semibold ${s.tldColor}`}>{tld}</span>
-        </p>
+      {/* domain-status-row */}
+      <div className="flex w-full items-center justify-between gap-[12px]">
+        <p className={`whitespace-nowrap font-mono text-[20px] ${s.domainClass}`}>{domain}</p>
 
-        <div className="flex h-[20px] w-[64px] shrink-0 items-center justify-end overflow-hidden">
-          <p
-            className={`w-full text-right font-meta text-[10px] font-semibold leading-[20px] tracking-[0.8px] ${s.labelColor}`}
-          >
+        <div className={`flex shrink-0 items-center gap-[8px] rounded-[6px] border px-[16px] py-[8px] ${s.badgeClass}`}>
+          <CircleIndicator className={`size-[8px] ${s.dotClass}`} />
+          <p className={`whitespace-nowrap font-card-display text-[12px] font-bold tracking-[0.5px] ${s.labelClass}`}>
             {s.label}
           </p>
         </div>
       </div>
 
+      {/* alternatives-section */}
+      <div className="flex w-full items-baseline gap-[16px]">
+        <p className="whitespace-nowrap font-card-display text-[13px] font-bold tracking-[0.5px] text-card-muted">
+          ALSO FREE
+        </p>
+        <div className="flex items-start gap-[16px] text-[18px]">
+          {tlds.map((t) => (
+            <p
+              key={t.ext}
+              className={
+                isLoading
+                  ? 'font-card-display font-normal text-card-muted'
+                  : t.available
+                    ? 'font-card-display font-bold text-on-surface'
+                    : 'font-card-display font-normal text-taken line-through decoration-solid [text-decoration-skip-ink:none] [text-underline-position:from-font]'
+              }
+            >
+              {t.ext}
+            </p>
+          ))}
+        </div>
+      </div>
+
+      {/* Horizontal/Inset divider */}
+      <div className="w-[320px] border-t border-outline-variant" />
+
+      {/* footer-actions */}
       {hasActions && (
-        <div className="flex w-full items-center gap-[16px] border-t border-[#e5e5e5] pt-[12px] font-meta text-[11px] font-semibold">
+        <div className="flex w-full items-center gap-[20px] text-card-muted">
           {onCopy && (
             <button
               type="button"
-              onClick={() => onCopy(`${domain}${tld}`)}
-              className="text-[#4a4a4a] hover:text-[#0a0a0a]"
+              aria-label="Copy domain"
+              onClick={onCopy}
+              className="flex size-[32px] items-center justify-center transition-colors hover:text-on-surface"
             >
-              Copy
+              <CopyIcon className="size-[22px]" />
             </button>
           )}
           {onToggleShortlist && (
             <button
               type="button"
+              aria-label="Save to shortlist"
               onClick={onToggleShortlist}
-              className={isShortlisted ? 'text-[#0a0a0a]' : 'text-[#4a4a4a] hover:text-[#0a0a0a]'}
+              className={`flex size-[24px] items-center justify-center transition-colors hover:text-on-surface ${isShortlisted ? 'text-on-surface' : ''}`}
             >
-              {isShortlisted ? 'Shortlisted ✓' : 'Shortlist'}
+              <FavoriteIcon className="size-[24px]" filled={isShortlisted} />
             </button>
           )}
           {onToggleCompare && (
             <button
               type="button"
+              aria-label="Add to compare"
               onClick={onToggleCompare}
-              className={isCompared ? 'text-[#0a0a0a]' : 'text-[#4a4a4a] hover:text-[#0a0a0a]'}
+              className={`flex size-[24px] items-center justify-center transition-colors hover:text-on-surface ${isCompared ? 'text-on-surface' : ''}`}
             >
-              {isCompared ? 'Comparing ✓' : 'Compare'}
+              <SettingsIcon className="size-[24px]" />
             </button>
           )}
         </div>

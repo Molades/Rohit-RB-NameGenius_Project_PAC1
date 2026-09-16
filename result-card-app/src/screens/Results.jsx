@@ -8,16 +8,25 @@ const LENGTH_OPTIONS = [
   { key: 'long', label: 'Long (>10)' },
 ]
 
+function primaryTld(domain) {
+  return '.' + domain.split('.').pop()
+}
+function nameLength(domain) {
+  return domain.slice(0, domain.lastIndexOf('.')).length
+}
 function matchesFilters(item, filters) {
-  if (filters.tld !== 'any' && item.tld !== filters.tld) return false
-  if (filters.length === 'short' && item.domain.length > 10) return false
-  if (filters.length === 'long' && item.domain.length <= 10) return false
+  if (filters.tld !== 'any' && primaryTld(item.domain) !== filters.tld) return false
+  if (filters.length === 'short' && nameLength(item.domain) > 10) return false
+  if (filters.length === 'long' && nameLength(item.domain) <= 10) return false
   return true
 }
 
 export default function Results({
   brief,
   results,
+  isChecking,
+  error,
+  onRetry,
   filters,
   onFiltersChange,
   shortlist,
@@ -34,27 +43,27 @@ export default function Results({
 
   const visible = results.filter((r) => matchesFilters(r, filters))
 
-  const copy = async (fullDomain) => {
+  const copy = async (domain) => {
     try {
-      await navigator.clipboard.writeText(fullDomain)
+      await navigator.clipboard.writeText(domain)
     } catch {
       // clipboard permission denied — the UI still confirms so the flow isn't blocked
     }
-    setCopiedDomain(fullDomain)
-    setTimeout(() => setCopiedDomain((d) => (d === fullDomain ? null : d)), 1500)
+    setCopiedDomain(domain)
+    setTimeout(() => setCopiedDomain((d) => (d === domain ? null : d)), 1500)
   }
 
   return (
     <main className="flex justify-center bg-canvas px-6 py-10 sm:px-16 sm:py-16">
-      <div className="flex w-full max-w-[1039px] flex-col gap-7">
+      <div className="flex w-full max-w-[1080px] flex-col gap-7">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="font-display text-[20px] font-bold leading-[24px] tracking-[-0.2px] text-ink">
+          <h1 className="font-display text-[28px] font-bold leading-[30px] tracking-[-0.4px] text-ink">
             5 names for {brief.name || 'your brand'}
           </h1>
           <button
             type="button"
             onClick={onRegenerate}
-            disabled={pendingQuestion !== null}
+            disabled={pendingQuestion !== null || isChecking}
             className="border border-ink bg-paper px-5 py-3 font-meta text-[12px] font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40"
           >
             Regenerate 5 more
@@ -92,33 +101,41 @@ export default function Results({
           </div>
         </div>
 
-        {visible.length === 0 ? (
+        {error ? (
+          <div className="flex flex-col items-center gap-3 border border-border bg-paper px-5 py-10 text-center">
+            <p className="font-meta text-[12px] text-meta">{error}</p>
+            <button
+              type="button"
+              onClick={onRetry}
+              className="border border-ink bg-paper px-5 py-2 font-meta text-[12px] font-semibold text-ink"
+            >
+              Try again
+            </button>
+          </div>
+        ) : visible.length === 0 ? (
           <div className="border border-border bg-paper px-5 py-8 text-center">
             <p className="font-meta text-[12px] text-meta">No results match these filters. Try widening them.</p>
           </div>
         ) : (
           <div className="flex flex-wrap gap-5">
-            {visible.map((r) => {
-              const fullDomain = `${r.domain}${r.tld}`
-              return (
-                <div key={r.domain} className="flex flex-col gap-1">
-                  <ResultCard
-                    name={r.name}
-                    domain={r.domain}
-                    tld={r.tld}
-                    state={r.state}
-                    onCopy={copy}
-                    onToggleShortlist={() => onToggleShortlist(r)}
-                    isShortlisted={shortlist.some((s) => s.domain === r.domain)}
-                    onToggleCompare={() => onToggleCompare(r)}
-                    isCompared={compareSel.some((s) => s.domain === r.domain)}
-                  />
-                  {copiedDomain === fullDomain && (
-                    <p className="font-meta text-[11px] text-meta">Copied {fullDomain}</p>
-                  )}
-                </div>
-              )
-            })}
+            {visible.map((r) => (
+              <div key={r.domain} className="flex flex-col gap-1">
+                <ResultCard
+                  name={r.name}
+                  domain={r.domain}
+                  status={isChecking ? 'loading' : r.status}
+                  tlds={r.tlds}
+                  onCopy={() => copy(r.domain)}
+                  onToggleShortlist={() => onToggleShortlist(r)}
+                  isShortlisted={shortlist.some((s) => s.domain === r.domain)}
+                  onToggleCompare={() => onToggleCompare(r)}
+                  isCompared={compareSel.some((s) => s.domain === r.domain)}
+                />
+                {copiedDomain === r.domain && (
+                  <p className="font-meta text-[11px] text-meta">Copied {r.domain}</p>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
@@ -131,7 +148,7 @@ export default function Results({
               onChange={(e) => setAnswerDraft(e.target.value)}
               rows={2}
               placeholder="Answer to sharpen the next batch..."
-              className="border border-border px-4 py-[10px] font-meta text-[13px] outline-none focus:border-ink"
+              className="border border-border px-4 py-[10px] font-meta text-[12px] outline-none focus:border-ink"
             />
             <div className="flex items-center gap-4">
               <button

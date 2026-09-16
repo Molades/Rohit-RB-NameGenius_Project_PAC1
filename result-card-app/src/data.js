@@ -1,22 +1,24 @@
 // Mock candidate pool — stands in for the generator and RDAP lookups until Phase 3.
 // Deliberately mixes TLDs and name lengths so the filters have something real to do.
+// Shape matches ResultCard's props: name, domain (primary TLD included), status
+// ('available' | 'taken'), and tlds (the "ALSO FREE" alternates, each { ext, available }).
 
 export const CANDIDATE_POOL = [
-  { name: 'Loom & Carbon', domain: 'loomandcarbon', tld: '.com', state: 'available' },
-  { name: 'Foundry Grain', domain: 'foundrygrain', tld: '.com', state: 'available' },
-  { name: 'Heartwood Co', domain: 'heartwoodco', tld: '.com', state: 'available' },
-  { name: 'Article Frame', domain: 'articleframe', tld: '.com', state: 'taken' },
-  { name: 'Reclaimed Form', domain: 'reclaimedform', tld: '.com', state: 'taken' },
-  { name: 'Grain & Ore', domain: 'grainandore', tld: '.io', state: 'available' },
-  { name: 'Solid Oak Co', domain: 'solidoakco', tld: '.io', state: 'available' },
-  { name: 'Patina', domain: 'patina', tld: '.ai', state: 'available' },
-  { name: 'Joinery', domain: 'joinery', tld: '.com', state: 'taken' },
-  { name: 'Hearth & Frame', domain: 'hearthandframe', tld: '.io', state: 'available' },
-  { name: 'Timberline Studio', domain: 'timberlinestudio', tld: '.com', state: 'taken' },
-  { name: 'Knot & Beam', domain: 'knotandbeam', tld: '.com', state: 'available' },
-  { name: 'Ore', domain: 'ore', tld: '.ai', state: 'available' },
-  { name: 'Repair Culture', domain: 'repairculture', tld: '.com', state: 'taken' },
-  { name: 'Long Grain', domain: 'longgrain', tld: '.io', state: 'available' },
+  { name: 'Loom & Carbon', domain: 'loomandcarbon.com', status: 'available', tlds: [{ ext: '.io', available: true }, { ext: '.ai', available: false }, { ext: '.co', available: true }] },
+  { name: 'Foundry Grain', domain: 'foundrygrain.com', status: 'available', tlds: [{ ext: '.io', available: true }, { ext: '.ai', available: true }, { ext: '.co', available: false }] },
+  { name: 'Heartwood Co', domain: 'heartwoodco.com', status: 'available', tlds: [{ ext: '.io', available: false }, { ext: '.ai', available: true }, { ext: '.co', available: true }] },
+  { name: 'Article Frame', domain: 'articleframe.com', status: 'taken', tlds: [{ ext: '.io', available: false }, { ext: '.ai', available: true }, { ext: '.co', available: false }] },
+  { name: 'Reclaimed Form', domain: 'reclaimedform.com', status: 'taken', tlds: [{ ext: '.io', available: true }, { ext: '.ai', available: false }, { ext: '.co', available: false }] },
+  { name: 'Grain & Ore', domain: 'grainandore.io', status: 'available', tlds: [{ ext: '.com', available: true }, { ext: '.ai', available: true }, { ext: '.co', available: false }] },
+  { name: 'Solid Oak Co', domain: 'solidoakco.io', status: 'available', tlds: [{ ext: '.com', available: false }, { ext: '.ai', available: true }, { ext: '.co', available: true }] },
+  { name: 'Patina', domain: 'patina.ai', status: 'available', tlds: [{ ext: '.com', available: false }, { ext: '.io', available: true }, { ext: '.co', available: true }] },
+  { name: 'Joinery', domain: 'joinery.com', status: 'taken', tlds: [{ ext: '.io', available: true }, { ext: '.ai', available: false }, { ext: '.co', available: true }] },
+  { name: 'Hearth & Frame', domain: 'hearthandframe.io', status: 'available', tlds: [{ ext: '.com', available: false }, { ext: '.ai', available: true }, { ext: '.co', available: false }] },
+  { name: 'Timberline Studio', domain: 'timberlinestudio.com', status: 'taken', tlds: [{ ext: '.io', available: true }, { ext: '.ai', available: true }, { ext: '.co', available: false }] },
+  { name: 'Knot & Beam', domain: 'knotandbeam.com', status: 'available', tlds: [{ ext: '.io', available: true }, { ext: '.ai', available: false }, { ext: '.co', available: true }] },
+  { name: 'Ore', domain: 'ore.ai', status: 'available', tlds: [{ ext: '.com', available: false }, { ext: '.io', available: false }, { ext: '.co', available: true }] },
+  { name: 'Repair Culture', domain: 'repairculture.com', status: 'taken', tlds: [{ ext: '.io', available: true }, { ext: '.ai', available: true }, { ext: '.co', available: true }] },
+  { name: 'Long Grain', domain: 'longgrain.io', status: 'available', tlds: [{ ext: '.com', available: false }, { ext: '.ai', available: true }, { ext: '.co', available: true }] },
 ]
 
 export const QUESTIONS = [
