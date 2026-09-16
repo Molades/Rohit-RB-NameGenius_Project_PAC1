@@ -24,6 +24,10 @@ export async function generateNames(brief, excludeNames = []) {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: buildPrompt(brief, excludeNames) }] }],
+        // Disable extended thinking — we only need a short JSON array back,
+        // and thinking adds latency plus multi-part responses we'd have to
+        // pick apart for no benefit here.
+        generationConfig: { thinkingConfig: { thinkingBudget: 0 } },
       }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     })
