@@ -50,7 +50,17 @@ export async function generateNames(brief, excludeNames = []) {
   }
 
   const data = await res.json()
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  if (data?.promptFeedback?.blockReason) {
+    throw new Error("Couldn't parse name ideas from Gemini's response.")
+  }
+  // Newer models may return multiple parts (reasoning/"thought" parts plus the
+  // final answer) — join every non-thought part rather than assuming parts[0]
+  // holds the whole answer.
+  const parts = data?.candidates?.[0]?.content?.parts || []
+  const text = parts
+    .filter((p) => !p.thought)
+    .map((p) => p.text || '')
+    .join('')
   const match = text.match(/\[[\s\S]*\]/)
   if (!match) throw new Error("Couldn't parse name ideas from Gemini's response.")
 
