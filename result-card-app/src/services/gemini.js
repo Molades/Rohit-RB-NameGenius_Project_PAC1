@@ -13,15 +13,26 @@ function buildPrompt(brief, excludeNames) {
   return lines.join('\n')
 }
 
+const REQUEST_TIMEOUT_MS = 20000
+
 export async function generateNames(brief, excludeNames = []) {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-  const res = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: buildPrompt(brief, excludeNames) }] }],
-    }),
-  })
+  let res
+  try {
+    res = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: buildPrompt(brief, excludeNames) }] }],
+      }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
+  } catch (err) {
+    if (err.name === 'TimeoutError' || err.name === 'AbortError') {
+      throw new Error('Gemini took too long to respond. Try again.')
+    }
+    throw new Error('Could not reach Gemini. Check your connection and try again.')
+  }
 
   if (!res.ok) {
     let body = null
