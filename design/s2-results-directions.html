@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>S2 — Results: three directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-ink: #0a0a0a;
+    --color-paper: #ffffff;
+    --color-canvas: #fafafa;
+    --color-border: #e5e5e5;
+    --color-meta: #737373;
+    --color-label: #171717;
+    --color-muted: #4a4a4a;
+    --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    --font-meta: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #d4d4d4; font-family: var(--font-meta); padding: 0 0 64px; }
+
+  section.direction { background: var(--color-canvas); margin-bottom: 24px; }
+  .tag-bar { padding: 16px 32px; border-bottom: 1px solid var(--color-border); background: var(--color-paper); }
+  .tag-bar .tag { font-family: var(--font-meta); font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--color-meta); }
+  .tag-bar .title { font-family: var(--font-meta); font-size: 12px; font-weight: 600; color: var(--color-ink); margin-top: 4px; }
+  .body { padding: 32px; }
+
+  h1.screen { font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 30px; letter-spacing: -0.4px; color: var(--color-ink); margin: 0; }
+
+  .chip { border: 1px solid var(--color-border); background: var(--color-paper); color: var(--color-ink); font-family: var(--font-meta); font-size: 12px; font-weight: 600; padding: 6px 14px; }
+  .chip.active { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+  .btn { border: 1px solid var(--color-ink); background: var(--color-paper); color: var(--color-ink); font-family: var(--font-meta); font-size: 12px; font-weight: 600; padding: 12px 20px; }
+  .btn.filled { background: var(--color-ink); color: var(--color-paper); }
+  .link { font-family: var(--font-meta); font-size: 12px; font-weight: 600; color: var(--color-ink); cursor: pointer; }
+
+  /* ============ Direction 1 — dense list ============ */
+  .d1-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 24px 0 8px; flex-wrap: wrap; }
+  .d1-toolbar .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .d1-list { border-top: 1px solid var(--color-border); }
+  .d1-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 0; border-bottom: 1px solid var(--color-border); }
+  .d1-row .name-col { min-width: 0; }
+  .d1-row .name { font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 30px; letter-spacing: -0.4px; color: var(--color-ink); margin: 0 0 6px 0; }
+  .d1-row .name.struck { text-decoration: line-through; color: var(--color-muted); }
+  .d1-row .domain { font-family: var(--font-meta); font-size: 12px; color: var(--color-meta); margin: 0 0 10px 0; }
+  .d1-row .stats { display: flex; gap: 16px; font-family: var(--font-meta); font-size: 11px; font-weight: 600; color: var(--color-meta); }
+  .d1-row .stats b { color: var(--color-ink); font-weight: 600; }
+  .d1-row .status { flex-shrink: 0; font-family: var(--font-meta); font-size: 10px; font-weight: 600; letter-spacing: 0.8px; color: var(--color-ink); white-space: nowrap; }
+
+  /* ============ Direction 2 — compact grid ============ */
+  .d2-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 24px 0; }
+  .d2-toolbar .controls { display: flex; align-items: center; gap: 16px; }
+  .d2-toolbar .view-toggle { display: flex; border: 1px solid var(--color-border); }
+  .d2-toolbar .view-toggle span { padding: 6px 10px; font-size: 13px; color: var(--color-meta); border-left: 1px solid var(--color-border); cursor: pointer; }
+  .d2-toolbar .view-toggle span:first-child { border-left: none; }
+  .d2-toolbar .view-toggle span.active { background: var(--color-ink); color: var(--color-paper); }
+  .d2-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--color-border); border: 1px solid var(--color-border); }
+  .d2-card { background: var(--color-paper); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+  .d2-card .name { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: -0.2px; color: var(--color-ink); margin: 0; }
+  .d2-card .name.struck { text-decoration: line-through; color: var(--color-muted); }
+  .d2-card .domain { font-family: var(--font-meta); font-size: 11px; color: var(--color-meta); margin: 0; }
+  .d2-card .status { font-family: var(--font-meta); font-size: 10px; font-weight: 600; letter-spacing: 0.8px; color: var(--color-ink); }
+  .d2-card .action { margin-top: 8px; font-family: var(--font-meta); font-size: 11px; font-weight: 600; color: var(--color-ink); }
+
+  /* ============ Direction 3 — grouped lanes ============ */
+  .d3-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .d3-lanes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .d3-lane-head { display: flex; align-items: baseline; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--color-ink); margin-bottom: 16px; }
+  .d3-lane-head .label { font-family: var(--font-meta); font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--color-ink); }
+  .d3-lane-head .count { font-family: var(--font-meta); font-size: 10px; color: var(--color-meta); }
+  .d3-card { border: 1px solid var(--color-border); background: var(--color-paper); padding: 16px; margin-bottom: 12px; }
+  .d3-card .name { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -0.2px; color: var(--color-ink); margin: 0 0 4px 0; }
+  .d3-card .name.struck { text-decoration: line-through; color: var(--color-muted); }
+  .d3-card .domain { font-family: var(--font-meta); font-size: 11px; color: var(--color-meta); margin: 0; }
+  .d3-lane-more { font-family: var(--font-meta); font-size: 11px; font-weight: 600; color: var(--color-meta); }
+
+  .note { padding: 20px 32px 0; font-family: var(--font-meta); font-size: 12px; line-height: 20px; color: var(--color-muted); border-top: 1px solid var(--color-border); }
+</style>
+</head>
+<body>
+
+<!-- ================= DIRECTION 1 ================= -->
+<section class="direction">
+  <div class="tag-bar">
+    <div class="tag">Direction 1 — dense list (My Course reference)</div>
+    <div class="title">One row per candidate, per-item stat line, unified toolbar</div>
+  </div>
+  <div class="body">
+    <h1 class="screen">5 names for Loom &amp; Carbon</h1>
+
+    <div class="d1-toolbar">
+      <div class="chips">
+        <div class="chip active">All TLDs</div>
+        <div class="chip">.com</div>
+        <div class="chip">.io</div>
+        <div class="chip">.ai</div>
+      </div>
+      <div class="chip">↻ Regenerate 5 more</div>
+    </div>
+
+    <div class="d1-list">
+      <div class="d1-row">
+        <div class="name-col">
+          <p class="name">Loom &amp; Carbon</p>
+          <p class="domain">loomandcarbon.com</p>
+          <div class="stats"><span><b>.com</b> available</span><span><b>.io</b> available</span><span><b>.ai</b> taken</span></div>
+        </div>
+        <div class="status">AVAILABLE</div>
+      </div>
+      <div class="d1-row">
+        <div class="name-col">
+          <p class="name">Foundry Grain</p>
+          <p class="domain">foundrygrain.com</p>
+          <div class="stats"><span><b>.com</b> available</span><span><b>.io</b> taken</span><span><b>.ai</b> available</span></div>
+        </div>
+        <div class="status">AVAILABLE</div>
+      </div>
+      <div class="d1-row">
+        <div class="name-col">
+          <p class="name struck">Article Frame</p>
+          <p class="domain">articleframe.com</p>
+          <div class="stats"><span><b>.com</b> taken</span><span><b>.io</b> taken</span><span><b>.ai</b> available</span></div>
+        </div>
+        <div class="status">TAKEN</div>
+      </div>
+      <div class="d1-row">
+        <div class="name-col">
+          <p class="name">Solid Oak Co</p>
+          <p class="domain">solidoakco.io</p>
+          <div class="stats"><span><b>.com</b> taken</span><span><b>.io</b> available</span><span><b>.ai</b> available</span></div>
+        </div>
+        <div class="status">AVAILABLE</div>
+      </div>
+      <div class="d1-row">
+        <div class="name-col">
+          <p class="name struck">Reclaimed Form</p>
+          <p class="domain">reclaimedform.com</p>
+          <div class="stats"><span><b>.com</b> taken</span><span><b>.io</b> available</span><span><b>.ai</b> taken</span></div>
+        </div>
+        <div class="status">TAKEN</div>
+      </div>
+    </div>
+
+    <p class="note">Fewer items fit per screen, but each one reports on all three TLDs at once instead of one — trades result-count for per-name completeness. Regenerate lives inside the same toolbar as the TLD filter, one control bar instead of today's two-tier header.</p>
+  </div>
+</section>
+
+<!-- ================= DIRECTION 2 ================= -->
+<section class="direction">
+  <div class="tag-bar">
+    <div class="tag">Direction 2 — compact grid (Zaga Resources reference)</div>
+    <div class="title">4-up grid, one action per card, quiet header controls</div>
+  </div>
+  <div class="body">
+    <div class="d2-toolbar">
+      <h1 class="screen">5 names for Loom &amp; Carbon</h1>
+      <div class="controls">
+        <span class="link">↻ Regenerate</span>
+        <div class="view-toggle"><span class="active">⊞</span><span>≡</span></div>
+        <span class="link">Filter</span>
+      </div>
+    </div>
+
+    <div class="d2-grid">
+      <div class="d2-card"><p class="name">Loom &amp; Carbon</p><p class="domain">loomandcarbon.com</p><p class="status">AVAILABLE</p><p class="action">Shortlist →</p></div>
+      <div class="d2-card"><p class="name">Foundry Grain</p><p class="domain">foundrygrain.com</p><p class="status">AVAILABLE</p><p class="action">Shortlist →</p></div>
+      <div class="d2-card"><p class="name struck">Article Frame</p><p class="domain">articleframe.com</p><p class="status">TAKEN</p><p class="action">Shortlist →</p></div>
+      <div class="d2-card"><p class="name">Solid Oak Co</p><p class="domain">solidoakco.io</p><p class="status">AVAILABLE</p><p class="action">Shortlist →</p></div>
+      <div class="d2-card"><p class="name struck">Reclaimed Form</p><p class="domain">reclaimedform.com</p><p class="status">TAKEN</p><p class="action">Shortlist →</p></div>
+      <div class="d2-card"><p class="name">Grain &amp; Ore</p><p class="domain">grainandore.io</p><p class="status">AVAILABLE</p><p class="action">Shortlist →</p></div>
+      <div class="d2-card"><p class="name">Heartwood Co</p><p class="domain">heartwoodco.com</p><p class="status">AVAILABLE</p><p class="action">Shortlist →</p></div>
+      <div class="d2-card"><p class="name">Patina</p><p class="domain">patina.ai</p><p class="status">AVAILABLE</p><p class="action">Shortlist →</p></div>
+    </div>
+
+    <p class="note">Twice as many results on screen, but the name treatment shrinks from the card's 28px to 16px to fit, and each card keeps only one action (Shortlist) instead of the card's three (Copy/Shortlist/Compare) — flagging both as real tradeoffs, not free density. Regenerate demotes to a plain text link beside a grid/list toggle, no longer a bordered button.</p>
+  </div>
+</section>
+
+<!-- ================= DIRECTION 3 ================= -->
+<section class="direction">
+  <div class="tag-bar">
+    <div class="tag">Direction 3 — grouped lanes (Statra Kanban reference)</div>
+    <div class="title">Split by availability, dual regenerate (global + per-lane)</div>
+  </div>
+  <div class="body">
+    <div class="d3-header">
+      <h1 class="screen">5 names for Loom &amp; Carbon</h1>
+      <div class="btn filled">Regenerate 5 more</div>
+    </div>
+
+    <div class="d3-lanes">
+      <div>
+        <div class="d3-lane-head"><span class="label">Available</span><span class="count">3</span></div>
+        <div class="d3-card"><p class="name">Loom &amp; Carbon</p><p class="domain">loomandcarbon.com</p></div>
+        <div class="d3-card"><p class="name">Foundry Grain</p><p class="domain">foundrygrain.com</p></div>
+        <div class="d3-card"><p class="name">Solid Oak Co</p><p class="domain">solidoakco.io</p></div>
+        <div class="d3-lane-more">+ regenerate this group</div>
+      </div>
+      <div>
+        <div class="d3-lane-head"><span class="label">Taken</span><span class="count">2</span></div>
+        <div class="d3-card"><p class="name struck">Article Frame</p><p class="domain">articleframe.com</p></div>
+        <div class="d3-card"><p class="name struck">Reclaimed Form</p><p class="domain">reclaimedform.com</p></div>
+        <div class="d3-lane-more">+ regenerate this group</div>
+      </div>
+    </div>
+
+    <p class="note">The only direction where "taken" results get their own lane instead of sitting inline with everything else — arguably more useful (available names are visually separated, no scanning past taken ones) but it's a bigger product change: regeneration would need to work per-lane, and the app doesn't currently have that operation. Global "Regenerate 5 more" stays as today's bordered button; the per-lane link is new and would need real behavior, not just a visual add.</p>
+  </div>
+</section>
+
+</body>
+</html>

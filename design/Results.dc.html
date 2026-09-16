@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
+  <style>
+    body { margin: 0; }
+    * { box-sizing: border-box; }
+    .ng { font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .mono { font-family: 'Space Mono', ui-monospace, monospace; }
+    a { color: #0a0a0a; }
+    a:hover { color: #6b6b6b; }
+  </style>
+</helmet>
+
+<div class="ng" style="width:1200px; min-height:1120px; background:#ffffff; color:#0a0a0a; padding:52px 72px; position:relative;">
+
+  <!-- header -->
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <div style="font-size:18px; font-weight:700; letter-spacing:-0.02em;">NameGenius</div>
+    <div style="display:flex; align-items:center; gap:28px; font-size:14px; color:#6b6b6b;">
+      <span style="text-decoration:underline; text-underline-offset:4px; text-decoration-color:#c9c9c9;">Shortlist <span style="color:#0a0a0a; font-weight:600;">2</span></span>
+      <span style="text-decoration:underline; text-underline-offset:4px; text-decoration-color:#c9c9c9;">Compare <span style="color:#0a0a0a; font-weight:600;">2</span></span>
+      <span style="text-decoration:underline; text-underline-offset:4px; text-decoration-color:#c9c9c9;">Questions</span>
+    </div>
+  </div>
+
+  <!-- back + hero -->
+  <div style="margin-top:44px; font-size:14px; color:#6b6b6b;">&larr; New search</div>
+  <div style="margin-top:18px; display:flex; align-items:baseline; gap:18px;">
+    <span style="font-size:12px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color:#9a9a9a;">Ideas for</span>
+    <h1 style="margin:0; font-size:52px; line-height:1.0; font-weight:800; letter-spacing:-0.04em;">Northwind</h1>
+  </div>
+
+  <!-- filter bar -->
+  <div style="margin-top:34px; display:flex; align-items:center; justify-content:space-between; padding:16px 0; border-top:1.5px solid #0a0a0a; border-bottom:1.5px solid #0a0a0a;">
+    <div style="display:flex; align-items:center; gap:34px;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span style="font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9a9a9a;">TLD</span>
+        <span style="font-size:15px; font-weight:600; box-shadow: inset 0 -0.1em 0 #0a0a0a; padding-bottom:2px;">any</span>
+        <span class="mono" style="font-size:14px; color:#9a9a9a;">.com</span>
+        <span class="mono" style="font-size:14px; color:#9a9a9a;">.io</span>
+        <span class="mono" style="font-size:14px; color:#9a9a9a;">.co</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span style="font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9a9a9a;">Length</span>
+        <span style="font-size:15px; font-weight:600; box-shadow: inset 0 -0.1em 0 #0a0a0a; padding-bottom:2px;">any</span>
+        <span style="font-size:15px; color:#9a9a9a;">short</span>
+        <span style="font-size:15px; color:#9a9a9a;">catchy</span>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+      Regenerate
+    </div>
+  </div>
+
+  <!-- TOP PICK feature -->
+  <div style="margin-top:26px; background:#f6f6f5; padding:30px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px;">
+    <div>
+      <div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#0a0a0a;">Top pick</div>
+      <div style="margin-top:10px; font-size:38px; font-weight:700; letter-spacing:-0.03em; line-height:1;">Northpeak</div>
+      <div class="mono" style="margin-top:10px; font-size:16px; color:#6b6b6b;">northpeak.com</div>
+      <div style="margin-top:16px; display:flex; align-items:center; gap:16px;">
+        <span class="mono" style="font-size:13px; font-weight:700; color:#0a0a0a;">.com</span>
+        <span class="mono" style="font-size:13px; font-weight:700; color:#0a0a0a;">.io</span>
+        <span class="mono" style="font-size:13px; font-weight:700; color:#0a0a0a;">.co</span>
+        <span style="font-size:12px; color:#9a9a9a;">all three free</span>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:18px;">
+      <span style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:#0a0a0a; color:#ffffff; padding:6px 12px; border-radius:2px;">Available</span>
+      <div style="display:flex; align-items:center; gap:12px; color:#6b6b6b;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- result rows -->
+  <div style="margin-top:8px;">
+
+    <!-- row: BrightMind -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:26px 4px; border-bottom:1px solid #e4e4e4;">
+      <div>
+        <div style="font-size:28px; font-weight:600; letter-spacing:-0.02em;">BrightMind</div>
+        <div class="mono" style="margin-top:6px; font-size:15px; color:#6b6b6b;">brightmind.io</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:22px;">
+        <div class="mono" style="display:flex; align-items:center; gap:14px; font-size:13px;">
+          <span style="color:#c2c2c2; text-decoration:line-through;">.com</span>
+          <span style="color:#0a0a0a; font-weight:700;">.io</span>
+          <span style="color:#0a0a0a; font-weight:700;">.co</span>
+        </div>
+        <span style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:#0a0a0a; color:#ffffff; padding:6px 12px; border-radius:2px;">Available</span>
+        <div style="display:flex; align-items:center; gap:12px; color:#9a9a9a;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- row: Velocity Labs -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:26px 4px; border-bottom:1px solid #e4e4e4;">
+      <div>
+        <div style="font-size:28px; font-weight:600; letter-spacing:-0.02em;">Velocity Labs</div>
+        <div class="mono" style="margin-top:6px; font-size:15px; color:#6b6b6b;">velocitylabs.com</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:22px;">
+        <div class="mono" style="display:flex; align-items:center; gap:14px; font-size:13px;">
+          <span style="color:#0a0a0a; font-weight:700;">.com</span>
+          <span style="color:#0a0a0a; font-weight:700;">.io</span>
+          <span style="color:#c2c2c2; text-decoration:line-through;">.co</span>
+        </div>
+        <span style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:#0a0a0a; color:#ffffff; padding:6px 12px; border-radius:2px;">Available</span>
+        <div style="display:flex; align-items:center; gap:12px; color:#9a9a9a;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- row: Atlas -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:26px 4px; border-bottom:1px solid #e4e4e4;">
+      <div>
+        <div style="font-size:28px; font-weight:600; letter-spacing:-0.02em;">Atlas</div>
+        <div class="mono" style="margin-top:6px; font-size:15px; color:#6b6b6b;">atlas.co</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:22px;">
+        <div class="mono" style="display:flex; align-items:center; gap:14px; font-size:13px;">
+          <span style="color:#c2c2c2; text-decoration:line-through;">.com</span>
+          <span style="color:#c2c2c2; text-decoration:line-through;">.io</span>
+          <span style="color:#0a0a0a; font-weight:700;">.co</span>
+        </div>
+        <span style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:#0a0a0a; color:#ffffff; padding:6px 12px; border-radius:2px;">Available</span>
+        <div style="display:flex; align-items:center; gap:12px; color:#9a9a9a;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- row: Ferra -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:26px 4px; border-bottom:1px solid #e4e4e4;">
+      <div>
+        <div style="font-size:28px; font-weight:600; letter-spacing:-0.02em;">Ferra</div>
+        <div class="mono" style="margin-top:6px; font-size:15px; color:#6b6b6b;">ferra.io</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:22px;">
+        <div class="mono" style="display:flex; align-items:center; gap:14px; font-size:13px;">
+          <span style="color:#c2c2c2; text-decoration:line-through;">.com</span>
+          <span style="color:#0a0a0a; font-weight:700;">.io</span>
+          <span style="color:#c2c2c2; text-decoration:line-through;">.co</span>
+        </div>
+        <span style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:#0a0a0a; color:#ffffff; padding:6px 12px; border-radius:2px;">Available</span>
+        <div style="display:flex; align-items:center; gap:12px; color:#9a9a9a;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

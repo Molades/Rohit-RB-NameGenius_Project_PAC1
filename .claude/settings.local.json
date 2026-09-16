@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__2a7a46ed-5a82-411d-99d8-c7a0cc00be15__get_screenshot",
+      "mcp__2a7a46ed-5a82-411d-99d8-c7a0cc00be15__get_variable_defs",
+      "Bash(curl -sL -o featured.png \"https://www.figma.com/api/mcp/asset/3ddfc261-1a9d-4db2-94b4-0242ca770ad0.png\")",
+      "Bash(curl -sL -o taken.png \"https://www.figma.com/api/mcp/asset/d1e00a5a-7ecc-4b18-880d-ca4974f8635f.png\")"
+    ]
+  },
+  "enabledPlugins": {
+    "paper-desktop@paper": true
+  }
+}

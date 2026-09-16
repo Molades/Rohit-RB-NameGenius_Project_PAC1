@@ -1,0 +1,12 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "Brief", "x": 0, "y": 0, "w": 1200, "h": 940 },
+    { "file": "Results.dc.html", "x": 1320, "y": 0, "w": 1200, "h": 1120 },
+    { "file": "Shortlist.dc.html", "x": 0, "y": 1240, "w": 1200, "h": 720 },
+    { "file": "Compare.dc.html", "x": 1320, "y": 1240, "w": 1200, "h": 820 }
+  ],
+  "annotations": [
+    { "id": "direction-note", "x": 0, "y": -150, "w": 520, "text": "NameGenius — monochrome / editorial-typographic redesign.\nArchivo display + Space Mono for domains. Availability shown typographically (bold = free, struck = taken). Static hi-fi mockups." }
+  ],
+  "launch": { "view": "canvas" }
+}

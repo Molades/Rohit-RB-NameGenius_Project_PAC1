@@ -1,0 +1,13 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1120, "h": 760 },
+    { "file": "Loading.dc.html", "x": 1200, "y": 0, "w": 1120, "h": 760 },
+    { "file": "Results.dc.html", "x": 2400, "y": 0, "w": 1120, "h": 760 }
+  ],
+  "annotations": [
+    { "id": "flow-note", "x": 0, "y": -90, "w": 1120, "text": "1. Empty state" },
+    { "id": "flow-note-2", "x": 1200, "y": -90, "w": 1120, "text": "2. Loading state" },
+    { "id": "flow-note-3", "x": 2400, "y": -90, "w": 1120, "text": "3. Results state" }
+  ],
+  "launch": { "view": "canvas" }
+}

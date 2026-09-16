@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Brief — Direction C vs Direction B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-ink: #0a0a0a;
+    --color-paper: #ffffff;
+    --color-canvas: #fafafa;
+    --color-border: #e5e5e5;
+    --color-meta: #737373;
+    --color-label: #171717;
+    --color-muted: #4a4a4a;
+    --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    --font-meta: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #d4d4d4;
+    font-family: var(--font-meta);
+    padding: 48px 24px;
+  }
+  .wrap {
+    display: flex;
+    gap: 32px;
+    max-width: 1240px;
+    margin: 0 auto;
+    align-items: flex-start;
+  }
+  .col {
+    flex: 1;
+    min-width: 0;
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+  }
+  .col-head {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-paper);
+  }
+  .col-head .tag {
+    font-family: var(--font-meta);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--color-meta);
+  }
+  .col-head .title {
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-top: 4px;
+  }
+  .col-body { padding: 40px 32px; }
+
+  h1.screen {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 30px;
+    letter-spacing: -0.4px;
+    color: var(--color-ink);
+    margin: 0 0 32px 0;
+  }
+
+  label.field-label {
+    display: block;
+    font-family: var(--font-meta);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--color-meta);
+    margin-bottom: 8px;
+  }
+
+  .field {
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+    padding: 12px 16px;
+    font-family: var(--font-meta);
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--color-ink);
+  }
+  .field.placeholder { color: var(--color-meta); }
+
+  /* ---- Direction C: stacked (current production) ---- */
+  .stack { display: flex; flex-direction: column; gap: 32px; }
+  .stack textarea.field { width: 100%; resize: none; font: inherit; }
+  .tld-row { display: flex; align-items: center; gap: 12px; }
+  .chip {
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+  }
+  .chip.active { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+  .actions-row { display: flex; align-items: center; gap: 20px; }
+  .btn-primary {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 16px 28px;
+    border: 1px solid var(--color-ink);
+  }
+  .link-quiet {
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  /* ---- Direction B: inline composite bar ---- */
+  .bar {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--color-ink);
+    background: var(--color-paper);
+    margin-bottom: 8px;
+  }
+  .bar input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-meta);
+    font-size: 12px;
+    color: var(--color-ink);
+    padding: 16px;
+    flex: 1;
+    min-width: 0;
+  }
+  .bar input::placeholder { color: var(--color-meta); }
+  .bar .seg {
+    display: flex;
+    border-left: 1px solid var(--color-border);
+  }
+  .bar .seg button {
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-meta);
+    background: none;
+    border: none;
+    border-left: 1px solid var(--color-border);
+    padding: 0 16px;
+    cursor: pointer;
+  }
+  .bar .seg button:first-child { border-left: none; }
+  .bar .seg button.active { color: var(--color-ink); background: var(--color-canvas); }
+  .bar .cta {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid var(--color-ink);
+    white-space: nowrap;
+  }
+  .bar-caption {
+    font-family: var(--font-meta);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--color-meta);
+    margin: 0 0 32px 0;
+  }
+  .secondary-block {
+    border-top: 1px solid var(--color-border);
+    padding-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .secondary-two-col {
+    display: flex;
+    gap: 20px;
+  }
+  .secondary-two-col > div { flex: 1; min-width: 0; }
+  .link-quiet.link-below { margin-top: 24px; display: inline-block; }
+
+  .note {
+    max-width: 1240px;
+    margin: 16px auto 0;
+    font-family: var(--font-meta);
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="col">
+    <div class="col-head">
+      <div class="tag">Direction C — current</div>
+      <div class="title">Stacked, all fields visible</div>
+    </div>
+    <div class="col-body">
+      <h1 class="screen">Find a name you can own.</h1>
+      <div class="stack">
+        <div>
+          <label class="field-label">Name</label>
+          <div class="field">Loom &amp; Carbon</div>
+        </div>
+        <div>
+          <label class="field-label">Description</label>
+          <textarea class="field" rows="3" readonly>A studio that designs furniture from reclaimed hardwood, built to be repaired, not replaced.</textarea>
+        </div>
+        <div>
+          <label class="field-label">Competitors &amp; keywords</label>
+          <div class="field">Article, Floyd, sustainable, heirloom, modular</div>
+        </div>
+        <div class="tld-row">
+          <label class="field-label" style="margin:0;">Preferred TLD</label>
+          <div class="chip active">.com</div>
+          <div class="chip">.io</div>
+          <div class="chip">.ai</div>
+        </div>
+        <div class="actions-row">
+          <div class="btn-primary">Find names</div>
+          <div class="link-quiet">Sharpen with brand questions →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="col-head">
+      <div class="tag">Direction B — inline composite</div>
+      <div class="title">Primary bar + secondary block</div>
+    </div>
+    <div class="col-body">
+      <h1 class="screen">Find a name you can own.</h1>
+
+      <p class="bar-caption">Name + preferred TLD</p>
+      <div class="bar">
+        <input type="text" value="Loom &amp; Carbon" />
+        <div class="seg">
+          <button class="active">.com</button>
+          <button>.io</button>
+          <button>.ai</button>
+        </div>
+        <div class="cta">Find names</div>
+      </div>
+
+      <div class="secondary-block">
+        <p class="field-label" style="margin-bottom:0;">Add more detail (optional)</p>
+        <div class="secondary-two-col">
+          <div>
+            <label class="field-label">Description</label>
+            <textarea class="field" rows="3" readonly>A studio that designs furniture from reclaimed hardwood, built to be repaired, not replaced.</textarea>
+          </div>
+          <div>
+            <label class="field-label">Competitors &amp; keywords</label>
+            <div class="field" style="height:100%;">Article, Floyd, sustainable, heirloom, modular</div>
+          </div>
+        </div>
+        <div class="link-quiet link-below">Sharpen with brand questions →</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="note">Same tokens both sides — Outfit/Instrument Sans, ink/paper/canvas/border/meta, 28·12·11·10 type scale, 4px spacing grid. Only the structure changes: C stacks every field with equal weight; B collapses Name + TLD + entry action into one bordered row and pushes Description/Competitors below as an optional, lower-emphasis block.</p>
+
+</body>
+</html>

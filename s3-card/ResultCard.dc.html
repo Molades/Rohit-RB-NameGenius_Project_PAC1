@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    .rc { font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .rc-mono { font-family: 'Space Mono', ui-monospace, SFMono-Regular, monospace; }
+    a { color: #0a0a0a; }
+    a:hover { color: #0a0a0a; }
+    .rc-icon-btn { transition: background-color .12s ease, color .12s ease; }
+    .rc-icon-btn:hover { background: #e0e0e0; }
+    @keyframes rcSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .rc-spin { animation: rcSpin 0.9s linear infinite; transform-origin: center; }
+  </style>
+</helmet>
+
+<div class="rc" style="width:333px; display:flex; flex-direction:column; gap:12px; border:1px solid #e5e5e5; background:#ffffff; padding:24px; color:#0a0a0a;">
+
+  <!-- Name -->
+  <p style="margin:0; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:28px; font-weight:700; line-height:1.1; letter-spacing:-0.02em; color:#0a0a0a;">{{brandName}}</p>
+
+  <!-- Domain + availability badge -->
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%;">
+    <p class="rc-mono" style="margin:0; min-width:0; flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; line-height:1.4; {{domainStyle}}">{{domainText}}</p>
+
+    <div style="flex-shrink:0; display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:2px; background:{{badgeBg}}; color:{{badgeColor}}; border:{{badgeBorder}};">
+      <sc-if value="{{isLoading}}" hint-placeholder-val="{{true}}">
+        <svg class="rc-spin" width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+          <path d="M21 12C21 7.02944 16.9706 3 12 3" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </sc-if>
+      <sc-if value="{{notLoading}}" hint-placeholder-val="{{true}}">
+        <span style="{{statusDotStyle}}"></span>
+      </sc-if>
+      <span class="rc-mono" style="font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; white-space:nowrap;">{{badgeLabel}}</span>
+    </div>
+  </div>
+
+  <!-- Other-TLD availability indicators -->
+  <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px; width:100%;">
+    <span style="font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#9a9a9a; white-space:nowrap;">Also free</span>
+    <div class="rc-mono" style="display:flex; align-items:center; gap:12px; font-size:13px;">
+      <sc-for list="{{tlds}}" as="t" hint-placeholder-count="3">
+        <span style="{{t.style}}">{{t.ext}}</span>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div style="width:100%; height:1px; background:#e5e5e5;"></div>
+
+  <!-- Actions: copy / shortlist / add to compare -->
+  <div style="display:flex; align-items:center; gap:2px; color:{{actionsColor}}; pointer-events:{{actionsPointer}};">
+    <button type="button" aria-label="Copy domain" title="Copy domain" class="rc-icon-btn" style="border:none; background:transparent; padding:6px; border-radius:2px; display:flex; cursor:pointer; color:inherit;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+    </button>
+    <button type="button" aria-label="Save to shortlist" title="Save to shortlist" class="rc-icon-btn" style="border:none; background:transparent; padding:6px; border-radius:2px; display:flex; cursor:pointer; color:inherit;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
+      </svg>
+    </button>
+    <button type="button" aria-label="Add to compare" title="Add to compare" class="rc-icon-btn" style="border:none; background:transparent; padding:6px; border-radius:2px; display:flex; cursor:pointer; color:inherit;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18M3 12h18M3 18h18"/>
+        <circle cx="8" cy="6" r="2" fill="currentColor" stroke="none"/>
+        <circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/>
+        <circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{
+  "status": {"editor":"enum","default":"available","options":["available","taken","loading"],"section":"State"},
+  "brandName": {"editor":"text","default":"Nimbusly","section":"Content"},
+  "domain": {"editor":"text","default":"nimbusly","section":"Content"},
+  "tld": {"editor":"text","default":".com","section":"Content"}
+}'>
+class Component extends DCLogic {
+  renderVals() {
+    const status = this.props.status ?? 'available';
+    const brandName = this.props.brandName ?? 'Nimbusly';
+    const domainBase = (this.props.domain ?? brandName).toLowerCase().replace(/[^a-z0-9]/g, '');
+    const tld = this.props.tld ?? '.com';
+
+    const altTldSets = {
+      available: [ { ext: '.io', ok: true },  { ext: '.ai', ok: false }, { ext: '.co', ok: true } ],
+      taken:     [ { ext: '.io', ok: true },  { ext: '.ai', ok: true },  { ext: '.co', ok: false } ],
+      loading:   [ { ext: '.io', ok: null },  { ext: '.ai', ok: null },  { ext: '.co', ok: null } ],
+    };
+    const tlds = altTldSets[status].map((t) => {
+      let style;
+      if (t.ok === true) style = 'font-weight:700; color:#0a0a0a; text-decoration:none;';
+      else if (t.ok === false) style = 'font-weight:400; color:#c2c2c2; text-decoration:line-through;';
+      else style = 'font-weight:400; color:#c2c2c2; text-decoration:none;';
+      return { ext: t.ext, style };
+    });
+
+    const badgeByStatus = {
+      available: { label: 'AVAILABLE', bg: '#0a0a0a',     color: '#ffffff', border: '1px solid #0a0a0a' },
+      taken:     { label: 'TAKEN',     bg: 'transparent', color: '#9a9a9a', border: '1px solid #c2c2c2' },
+      loading:   { label: 'CHECKING',  bg: 'transparent', color: '#757575', border: '1px dashed #c2c2c2' },
+    };
+    const badge = badgeByStatus[status];
+
+    const statusDotByStatus = {
+      available: 'width:6px;height:6px;border-radius:50%;background:#ffffff;',
+      taken: 'width:6px;height:6px;border-radius:50%;background:transparent;border:1px solid #9a9a9a;',
+    };
+
+    const isLoading = status === 'loading';
+    const domainColor = isLoading ? '#9a9a9a' : '#6b6b6b';
+    const domainStyle = status === 'taken'
+      ? `color:${domainColor}; text-decoration:line-through; text-decoration-color:#c2c2c2;`
+      : `color:${domainColor};`;
+
+    return {
+      brandName,
+      domainText: domainBase + tld,
+      domainStyle,
+      badgeLabel: badge.label,
+      badgeBg: badge.bg,
+      badgeColor: badge.color,
+      badgeBorder: badge.border,
+      statusDotStyle: statusDotByStatus[status] ?? statusDotByStatus.available,
+      isLoading,
+      notLoading: !isLoading,
+      tlds,
+      actionsColor: isLoading ? '#c2c2c2' : '#9a9a9a',
+      actionsPointer: isLoading ? 'none' : 'auto',
+    };
+  }
+}
+</script>
+</body>
+</html>

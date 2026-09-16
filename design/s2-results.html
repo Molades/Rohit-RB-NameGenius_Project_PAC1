@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>S2 — Results (Direction 1: cards + regenerate)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    --font-meta: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; font-family: var(--font-meta); }
+
+  .tag-bar { padding: 16px 24px; border-bottom: 1px solid #e5e5e5; background: #fff; }
+  .tag-bar .tag { font-family: var(--font-meta); font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: #737373; }
+  .tag-bar .title { font-family: var(--font-meta); font-size: 12px; font-weight: 600; color: #0a0a0a; margin-top: 4px; }
+
+  main { display: flex; justify-content: center; padding: 40px 24px 64px; }
+  .container { width: 100%; max-width: 1039px; display: flex; flex-direction: column; gap: 28px; }
+
+  /* Header shares the grid's exact container width so title, button and
+     cards all sit on the same left/right edges — one layout, not a header
+     floating over an unrelated grid. */
+  .header-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+  h1.screen { font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 30px; letter-spacing: -0.4px; color: #0a0a0a; margin: 0; }
+  .btn-regen { border: 1px solid #0a0a0a; background: #fff; color: #0a0a0a; font-family: var(--font-meta); font-size: 12px; font-weight: 600; padding: 12px 20px; cursor: pointer; }
+
+  .grid { display: flex; flex-wrap: wrap; gap: 20px; }
+
+  /* ====== Phase 1 card, reproduced exactly — same classes/values as
+     result-card-app/src/components/ResultCard.jsx, nothing changed. ====== */
+  .card { display: flex; width: 333px; flex-direction: column; align-items: flex-start; gap: 12px; border: 1px solid #e5e5e5; background: #fff; padding: 24px; }
+  .card .name { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 30px; letter-spacing: -0.4px; color: #0a0a0a; margin: 0; }
+  .card .name.struck { text-decoration: line-through; }
+  .card .domain-row { display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 12px; overflow: hidden; }
+  .card .domain-tld { min-width: 0; flex: 1; overflow: hidden; white-space: nowrap; font-family: var(--font-meta); font-size: 12px; line-height: 20px; margin: 0; }
+  .card .domain-tld.struck { text-decoration: line-through; }
+  .card .sld { font-weight: 400; color: #737373; }
+  .card .tld { font-weight: 600; color: #171717; }
+  .card .status-wrap { display: flex; height: 20px; width: 64px; flex-shrink: 0; align-items: center; justify-content: flex-end; overflow: hidden; }
+  .card .status { width: 100%; text-align: right; font-family: var(--font-meta); font-size: 10px; font-weight: 600; line-height: 20px; letter-spacing: 0.8px; margin: 0; }
+  .card .status.available { color: #0a0a0a; }
+  .card .status.taken { color: #4a4a4a; }
+  .card .actions { display: flex; width: 100%; align-items: center; gap: 16px; border-top: 1px solid #e5e5e5; padding-top: 12px; font-family: var(--font-meta); font-size: 11px; font-weight: 600; }
+  .card .actions span { color: #4a4a4a; }
+
+  .note { max-width: 1039px; margin: 0 auto; padding: 0 24px 48px; font-family: var(--font-meta); font-size: 12px; line-height: 20px; color: #4a4a4a; }
+</style>
+</head>
+<body>
+
+<div class="tag-bar">
+  <div class="tag">S2 — Results · Direction 1</div>
+  <div class="title">Five result cards + regenerate — no filters, no question area, no loading variant (Phase 5 / Phase 3)</div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="header-row">
+      <h1 class="screen">5 names for Loom &amp; Carbon</h1>
+      <button class="btn-regen">Regenerate 5 more</button>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <p class="name">Loom &amp; Carbon</p>
+        <div class="domain-row">
+          <p class="domain-tld"><span class="sld">loomandcarbon</span><span class="tld">.com</span></p>
+          <div class="status-wrap"><p class="status available">AVAILABLE</p></div>
+        </div>
+        <div class="actions"><span>Copy</span><span>Shortlist</span><span>Compare</span></div>
+      </div>
+
+      <div class="card">
+        <p class="name">Foundry Grain</p>
+        <div class="domain-row">
+          <p class="domain-tld"><span class="sld">foundrygrain</span><span class="tld">.com</span></p>
+          <div class="status-wrap"><p class="status available">AVAILABLE</p></div>
+        </div>
+        <div class="actions"><span>Copy</span><span>Shortlist</span><span>Compare</span></div>
+      </div>
+
+      <div class="card">
+        <p class="name struck">Article Frame</p>
+        <div class="domain-row">
+          <p class="domain-tld struck"><span class="sld">articleframe</span><span class="tld">.com</span></p>
+          <div class="status-wrap"><p class="status taken">TAKEN</p></div>
+        </div>
+        <div class="actions"><span>Copy</span><span>Shortlist</span><span>Compare</span></div>
+      </div>
+
+      <div class="card">
+        <p class="name">Solid Oak Co</p>
+        <div class="domain-row">
+          <p class="domain-tld"><span class="sld">solidoakco</span><span class="tld">.io</span></p>
+          <div class="status-wrap"><p class="status available">AVAILABLE</p></div>
+        </div>
+        <div class="actions"><span>Copy</span><span>Shortlist</span><span>Compare</span></div>
+      </div>
+
+      <div class="card">
+        <p class="name struck">Reclaimed Form</p>
+        <div class="domain-row">
+          <p class="domain-tld struck"><span class="sld">reclaimedform</span><span class="tld">.com</span></p>
+          <div class="status-wrap"><p class="status taken">TAKEN</p></div>
+        </div>
+        <div class="actions"><span>Copy</span><span>Shortlist</span><span>Compare</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<p class="note">
+Card markup/values are a direct copy of the Phase 1 component — same border, padding, gap, type scale and state colors, nothing redrawn. The header sits inside the same 1039px container as the grid, so the title's left edge and the regenerate button's right edge line up exactly with the card grid's own edges — that's the one deliberate layout decision holding title, button and five cards together as a single composition rather than a header stacked on top of an unrelated grid. 3 available / 2 taken, mixed rather than grouped, since sorting by status is a Phase 5 concern (filters) not a Phase 2 one.
+</p>
+
+</body>
+</html>

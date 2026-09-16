@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
+  <style>
+    body { margin: 0; }
+    * { box-sizing: border-box; }
+    .ng { font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .mono { font-family: 'Space Mono', ui-monospace, monospace; }
+    a { color: #0a0a0a; }
+    a:hover { color: #6b6b6b; }
+    input.ng-in::placeholder { color: #b3b3b3; }
+  </style>
+</helmet>
+
+<div class="ng" style="width:1200px; min-height:940px; background:#ffffff; color:#0a0a0a; padding:52px 72px; position:relative;">
+
+  <!-- header -->
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <div style="font-size:18px; font-weight:700; letter-spacing:-0.02em;">NameGenius</div>
+    <div style="font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#9a9a9a;">Domain naming</div>
+  </div>
+
+  <!-- centered editorial column -->
+  <div style="max-width:600px; margin:104px auto 0;">
+
+    <h1 style="margin:0; text-align:center; font-size:70px; line-height:1.0; font-weight:800; letter-spacing:-0.04em;">
+      Find a name<br>you can <span style="box-shadow: inset 0 -0.10em 0 #0a0a0a;">own</span>.
+    </h1>
+    <p style="margin:24px auto 0; max-width:440px; text-align:center; font-size:17px; line-height:1.5; color:#6b6b6b;">
+      Type a name or keyword. We check the domains you can actually get.
+    </p>
+
+    <!-- form -->
+    <div style="margin-top:64px; display:flex; flex-direction:column; gap:30px;">
+
+      <!-- required field -->
+      <label style="display:block;">
+        <span style="display:block; margin-bottom:11px; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#0a0a0a;">Name to check</span>
+        <input class="ng ng-in" type="text" placeholder="e.g. Northwind"
+          style="width:100%; height:58px; border:1.5px solid #0a0a0a; border-radius:2px; padding:0 18px; font-size:18px; letter-spacing:-0.01em; color:#0a0a0a; background:#ffffff; outline:none;">
+      </label>
+
+      <!-- optional fields, quieter underline treatment -->
+      <label style="display:block;">
+        <span style="display:block; margin-bottom:9px; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#9a9a9a;">Description <span style="font-weight:400; text-transform:none; letter-spacing:0;">(optional)</span></span>
+        <input class="ng ng-in" type="text" placeholder="What does it do, in a sentence?"
+          style="width:100%; height:44px; border:0; border-bottom:1.5px solid #dcdcdc; border-radius:0; padding:0; font-size:17px; color:#0a0a0a; background:transparent; outline:none;">
+      </label>
+
+      <label style="display:block;">
+        <span style="display:block; margin-bottom:9px; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#9a9a9a;">Competitors &amp; keywords <span style="font-weight:400; text-transform:none; letter-spacing:0;">(optional)</span></span>
+        <input class="ng ng-in" type="text" placeholder="Names or words to steer toward — or away from"
+          style="width:100%; height:44px; border:0; border-bottom:1.5px solid #dcdcdc; border-radius:0; padding:0; font-size:17px; color:#0a0a0a; background:transparent; outline:none;">
+      </label>
+
+      <!-- TLD preference as typographic tabs -->
+      <div>
+        <span style="display:block; margin-bottom:14px; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#0a0a0a;">TLD preference</span>
+        <div style="display:flex; align-items:center; gap:28px;">
+          <span class="mono" style="font-size:17px; font-weight:700; color:#0a0a0a; box-shadow: inset 0 -0.12em 0 #0a0a0a; padding-bottom:2px;">.com</span>
+          <span class="mono" style="font-size:17px; color:#9a9a9a;">.io</span>
+          <span class="mono" style="font-size:17px; color:#9a9a9a;">.co</span>
+          <span class="ng" style="font-size:15px; color:#9a9a9a;">any TLD</span>
+        </div>
+      </div>
+
+      <!-- primary action -->
+      <button class="ng" type="button"
+        style="margin-top:8px; width:100%; height:60px; border:0; border-radius:2px; background:#0a0a0a; color:#ffffff; font-size:16px; font-weight:600; letter-spacing:0.01em; cursor:pointer;">
+        Find names
+      </button>
+    </div>
+
+    <div style="margin-top:28px; text-align:center;">
+      <a href="#" style="font-size:14px; color:#6b6b6b; text-decoration:underline; text-underline-offset:4px; text-decoration-color:#c9c9c9;">Questions to sharpen results</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "result-card-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "result-card-app"],
+      "port": 5178,
+      "autoPort": true
+    },
+    {
+      "name": "s3-card-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "s3-card-app"],
+      "port": 5190,
+      "autoPort": true
+    }
+  ]
+}

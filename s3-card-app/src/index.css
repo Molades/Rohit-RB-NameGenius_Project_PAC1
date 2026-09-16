@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+
+  /* Pulled from the Figma frame (node 248:670), Material 3 scheme + raw hex */
+  --color-surface: #fef7ff;
+  --color-on-surface: #1d1b20;
+  --color-outline-variant: #cac4d0;
+  --color-muted: #8a8a8a;
+  --color-taken: #c0c0c0;
+}
+
+html, body, #root { height: 100%; }
+body { margin: 0; background: #f2eef4; }

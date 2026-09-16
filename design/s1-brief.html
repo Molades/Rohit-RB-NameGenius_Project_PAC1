@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>S1 — Brief (Direction D, populated)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-ink: #0a0a0a;
+    --color-paper: #ffffff;
+    --color-canvas: #fafafa;
+    --color-border: #e5e5e5;
+    --color-meta: #737373;
+    --color-label: #171717;
+    --color-muted: #4a4a4a;
+    --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    --font-meta: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    font-family: var(--font-meta);
+  }
+  .tag-bar {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-paper);
+  }
+  .tag-bar .tag {
+    font-family: var(--font-meta);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--color-meta);
+  }
+  .tag-bar .title {
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-top: 4px;
+  }
+
+  main {
+    display: flex;
+    justify-content: center;
+    padding: 88px 24px 64px;
+  }
+  .col {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-text { text-align: center; }
+
+  h1.screen {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 30px;
+    letter-spacing: -0.4px;
+    color: var(--color-ink);
+    margin: 0 0 12px 0;
+  }
+  p.sub {
+    font-family: var(--font-meta);
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--color-meta);
+    margin: 0 auto 40px;
+    max-width: 420px;
+  }
+
+  /* Primary field — hero treatment: heavier padding, ink border, merged CTA.
+     This is the one element the direction says gets full weight; everything
+     below is deliberately quieter so it doesn't compete. */
+  .bar {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--color-ink);
+    background: var(--color-paper);
+    width: 100%;
+  }
+  .bar input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-meta);
+    font-size: 12px;
+    color: var(--color-ink);
+    padding: 20px 20px;
+    flex: 1;
+    min-width: 0;
+  }
+  .bar .cta {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    border: none;
+  }
+
+  .tld-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .tld-row .label {
+    font-family: var(--font-meta);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--color-meta);
+    margin-right: 4px;
+  }
+  .chip {
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+  }
+  .chip.active { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+
+  /* Secondary fields — deliberately quieter than the hero bar: lighter
+     border, tighter padding, no merged action. They read as context that's
+     already been supplied, not as the next required step. */
+  .details {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  label.field-label {
+    display: block;
+    font-family: var(--font-meta);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--color-meta);
+    margin-bottom: 8px;
+  }
+  .field {
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+    padding: 12px 16px;
+    font-family: var(--font-meta);
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--color-ink);
+    width: 100%;
+  }
+  textarea.field { resize: none; }
+  .char-count {
+    font-family: var(--font-meta);
+    font-size: 10px;
+    color: var(--color-meta);
+    margin: 6px 0 0 0;
+    text-align: right;
+  }
+
+  .deeper-link {
+    margin-top: 32px;
+    font-family: var(--font-meta);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-align: center;
+  }
+
+  .note {
+    max-width: 680px;
+    margin: 48px auto 0;
+    padding: 0 24px 48px;
+    font-family: var(--font-meta);
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--color-muted);
+  }
+  .note b { color: var(--color-ink); }
+</style>
+</head>
+<body>
+
+<div class="tag-bar">
+  <div class="tag">S1 — Brief · built in Direction D</div>
+  <div class="title">Populated state — reference: Consensus / Merlin / JobSek + the S3 result card</div>
+</div>
+
+<main>
+  <div class="col">
+    <div class="hero-text">
+      <h1 class="screen">Find a name you can own.</h1>
+      <p class="sub">Describe your business or drop a keyword — we'll generate names and check the domains.</p>
+    </div>
+
+    <div class="bar">
+      <input type="text" value="Loom &amp; Carbon" />
+      <button class="cta">Find names →</button>
+    </div>
+
+    <div class="tld-row">
+      <span class="label">TLD</span>
+      <div class="chip active">.com</div>
+      <div class="chip">.io</div>
+      <div class="chip">.ai</div>
+    </div>
+
+    <div class="details">
+      <div>
+        <label class="field-label">Description</label>
+        <textarea class="field" rows="6" readonly>A studio that designs solid-wood furniture from reclaimed hardwood — old barn beams, retired factory flooring, timber salvaged before a building comes down. Every piece is built to be repaired rather than replaced: modular joinery, fasteners you can see and tighten, parts a local carpenter can service decades from now without calling us first. We sell direct, mostly to people furnishing a first home who are tired of particleboard that gives up after five years. No dropshipping, no finish we can't name on request. Each piece ships with the story of the wood it came from — which building, which decade, who worked there — because provenance is most of what we're actually selling. We're not chasing scale; we're chasing furniture that outlives the person who bought it. Our people care about the gap between "sustainable" as a marketing word and "sustainable" as an actual constraint on what we're allowed to build and sell.</textarea>
+        <p class="char-count">929 / 1,000</p>
+      </div>
+      <div>
+        <label class="field-label">Competitors &amp; keywords</label>
+        <div class="field">Article, Floyd, sustainable, heirloom, modular, repairable, reclaimed hardwood</div>
+      </div>
+    </div>
+
+    <div class="deeper-link">Sharpen with brand questions →</div>
+  </div>
+</main>
+
+<p class="note">
+<b>Decisions made against the direction, not defaults:</b><br>
+— Name is the only field with the ink-bordered hero bar and merged action, echoing the single-field search pattern in the reference set; it's the one thing on this screen sized to be found in one glance.<br>
+— TLD sits as quiet chips directly under the hero bar (not stacked as a labeled field like the rest) because it modifies the primary action rather than adding brief context.<br>
+— Description and Competitors sit below a rule, in the card's quiet border-border/12px treatment, with no merged action of their own — they read as supplied context, not as more steps to complete. The character count against Description makes the ~1,000-char budget visible without adding a warning color.<br>
+— One entry action total (in the hero bar). No second "Find names" button at the bottom — a stacked form defaults to a bottom CTA; this direction doesn't.<br>
+Tokens: Outfit/Instrument Sans, ink/paper/canvas/border/meta, 28·12·11·10·10 type scale, sharp corners, 4px grid — same as S2 and the S3 card.
+</p>
+
+</body>
+</html>

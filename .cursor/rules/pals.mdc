@@ -1,0 +1,16 @@
+---
+description: NameGenius / PALS workspace conventions
+alwaysApply: true
+---
+
+# PALS / NameGenius
+
+This folder is a live-session lab with several prototypes. Read `CLAUDE.md` before changing code. Work in the app the user named; do not merge prototypes without being asked.
+
+- Vanilla: repo-root `index.html` / `app.js` / `style.css` (Groq + RDAP).
+- Full flow + generator: `namegenius/` (Vite port 5180).
+- Mock UI flow: `result-card-app/` (port 5178).
+- Result-card only: `s3-card-app/` (port 5190).
+- Comps: `design/`, `wireframe/`, `s3-card/` — visual reference only.
+
+UI tasks: follow `.claude/skills/prompt-enhancer/SKILL.md` (brief first). No new backend or live domain APIs in the React apps unless requested. Do not commit secrets or `node_modules`.

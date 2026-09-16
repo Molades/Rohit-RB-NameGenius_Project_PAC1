@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NameGenius</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="header">
+      <h1>NameGenius</h1>
+      <p class="tagline">Type a keyword. Get 10 business names. See which .com's are free.</p>
+      <p class="subtag">Built for solo founders in India</p>
+    </header>
+
+    <form id="searchForm" class="search-row" autocomplete="off">
+      <input
+        id="keywordInput"
+        type="text"
+        name="keyword"
+        placeholder="e.g. sustainable fashion"
+        required
+      />
+      <button id="generateBtn" type="submit">Generate Names</button>
+    </form>
+
+    <p id="errorMsg" class="error" hidden></p>
+
+    <section id="resultsSection" class="results">
+      <p class="results-label" id="resultsLabel">Enter a keyword above and hit Generate to see 8–10 name ideas with domain status</p>
+      <div id="cardsGrid" class="cards-grid"></div>
+    </section>
+  </main>
+
+  <button id="settingsToggle" class="settings-toggle" type="button" title="API key settings">⚙</button>
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form method="dialog" class="settings-form">
+      <h2>Groq API key (optional)</h2>
+      <p class="settings-note">
+        NameGenius works with no key at all — it falls back to a built-in offline name
+        generator. For AI-generated names, add a free Groq key (no credit card needed) from
+        <strong>console.groq.com/keys</strong>. Stored only in this browser's local storage,
+        used only to call Groq directly from your browser.
+      </p>
+      <input id="apiKeyInput" type="password" placeholder="gsk_..." autocomplete="off" />
+      <div class="settings-actions">
+        <button id="apiKeySave" type="submit" value="save">Save</button>
+        <button id="apiKeyClear" type="button" value="clear">Clear</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

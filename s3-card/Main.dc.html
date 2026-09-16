@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    .rc-page { font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .rc-page-mono { font-family: 'Space Mono', ui-monospace, SFMono-Regular, monospace; }
+  </style>
+</helmet>
+
+<div class="rc-page" style="width:100%; min-height:100%; background:#fafafa; color:#0a0a0a; padding:56px 64px;">
+  <div style="margin-bottom:40px;">
+    <p style="margin:0; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#9a9a9a;">S3 — Result card</p>
+    <p style="margin:6px 0 0; font-size:22px; font-weight:700; letter-spacing:-0.01em;">One component, three states</p>
+    <p class="rc-page-mono" style="margin:6px 0 0; font-size:13px; color:#6b6b6b;">Available · Taken · Loading — identical layout, status treatment only</p>
+  </div>
+
+  <div style="display:flex; align-items:flex-start; gap:32px; flex-wrap:wrap;">
+    <dc-import name="ResultCard" status="available" brand-name="Nimbusly" domain="nimbusly" tld=".com" hint-size="333px,258px"></dc-import>
+    <dc-import name="ResultCard" status="taken" brand-name="Acmeworks" domain="acmeworks" tld=".com" hint-size="333px,258px"></dc-import>
+    <dc-import name="ResultCard" status="loading" brand-name="Fieldnote" domain="fieldnote" tld=".com" hint-size="333px,258px"></dc-import>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

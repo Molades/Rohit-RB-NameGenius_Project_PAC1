@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
+  <style>
+    body { margin: 0; }
+    * { box-sizing: border-box; }
+    .ng { font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .mono { font-family: 'Space Mono', ui-monospace, monospace; }
+    a { color: #0a0a0a; }
+    a:hover { color: #6b6b6b; }
+  </style>
+</helmet>
+
+<div class="ng" style="width:1200px; min-height:720px; background:#ffffff; color:#0a0a0a; padding:52px 72px; position:relative;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <div style="font-size:18px; font-weight:700; letter-spacing:-0.02em;">NameGenius</div>
+    <div style="font-size:14px; color:#6b6b6b;">&larr; Back</div>
+  </div>
+
+  <div style="margin-top:52px; display:flex; align-items:baseline; gap:20px;">
+    <h1 style="margin:0; font-size:52px; line-height:1.0; font-weight:800; letter-spacing:-0.04em;">Shortlist</h1>
+    <span style="font-size:14px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#9a9a9a;">2 names</span>
+  </div>
+
+  <div style="margin-top:40px; border-top:1.5px solid #0a0a0a;">
+
+    <!-- BrightMind -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:30px 4px; border-bottom:1px solid #e4e4e4;">
+      <div style="display:flex; align-items:baseline; gap:20px;">
+        <span style="font-size:30px; font-weight:600; letter-spacing:-0.02em;">BrightMind</span>
+        <span class="mono" style="font-size:16px; color:#6b6b6b;">brightmind.io</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:26px;">
+        <div class="mono" style="display:flex; align-items:center; gap:14px; font-size:13px;">
+          <span style="color:#c2c2c2; text-decoration:line-through;">.com</span>
+          <span style="color:#0a0a0a; font-weight:700;">.io</span>
+          <span style="color:#0a0a0a; font-weight:700;">.co</span>
+        </div>
+        <span style="font-size:24px; color:#9a9a9a; cursor:pointer; line-height:1;">&times;</span>
+      </div>
+    </div>
+
+    <!-- Velocity Labs -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:30px 4px; border-bottom:1px solid #e4e4e4;">
+      <div style="display:flex; align-items:baseline; gap:20px;">
+        <span style="font-size:30px; font-weight:600; letter-spacing:-0.02em;">Velocity Labs</span>
+        <span class="mono" style="font-size:16px; color:#6b6b6b;">velocitylabs.com</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:26px;">
+        <div class="mono" style="display:flex; align-items:center; gap:14px; font-size:13px;">
+          <span style="color:#0a0a0a; font-weight:700;">.com</span>
+          <span style="color:#0a0a0a; font-weight:700;">.io</span>
+          <span style="color:#c2c2c2; text-decoration:line-through;">.co</span>
+        </div>
+        <span style="font-size:24px; color:#9a9a9a; cursor:pointer; line-height:1;">&times;</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:36px; display:flex; align-items:center; gap:16px;">
+    <button class="ng" type="button" style="height:52px; padding:0 28px; border:0; border-radius:2px; background:#0a0a0a; color:#ffffff; font-size:15px; font-weight:600; cursor:pointer;">Compare these</button>
+    <a href="#" style="font-size:14px; color:#6b6b6b; text-decoration:underline; text-underline-offset:4px; text-decoration-color:#c9c9c9;">Back to results</a>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

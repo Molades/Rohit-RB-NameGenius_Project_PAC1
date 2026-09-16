@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: 'Comic Sans MS', 'Segoe Print', cursive, sans-serif; background: #fafaf8; color: #222; }
+    a { color: #222; } a:hover { color: #555; }
+    .dash { border: 2px dashed #888; }
+  </style>
+</helmet>
+<div style="width: 1120px; min-height: 760px; box-sizing: border-box; padding: 40px 56px; display: flex; flex-direction: column; gap: 32px;">
+
+  <div style="display:flex; flex-direction:column; gap:6px; align-items:center; text-align:center;">
+    <div style="font-size:34px; font-weight:700; letter-spacing:0.5px;">NameGenius</div>
+    <div style="font-size:15px; color:#666;">Type a keyword. Get 10 business names. See which .com's are free.</div>
+    <div style="font-size:11px; color:#999; margin-top:2px;">Built for solo founders in India</div>
+  </div>
+
+  <div class="dash" style="display:flex; gap:12px; padding:18px; border-radius:4px;">
+    <div class="dash" style="flex-grow:1; padding:12px 14px; font-size:15px; color:#222; border-radius:3px; background:#fff;">sustainable fashion</div>
+    <div style="background:#666; color:#fff; padding:12px 26px; font-size:15px; border-radius:3px; white-space:nowrap; display:flex; align-items:center; gap:8px;">
+      <span>Generating…</span>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:10px;">
+    <div style="font-size:13px; color:#888;">Results (loading — generating names, then checking each .com)</div>
+    <div style="display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:16px;">
+      <sc-for list="{{skeletons}}" as="s" hint-placeholder-count="10">
+        <div class="dash" style="border-radius:6px; padding:18px 14px; display:flex; flex-direction:column; gap:10px; background:#fff;">
+          <div style="height:14px; width:70%; background:#e2e2e2; border-radius:2px;"></div>
+          <div style="height:10px; width:50%; background:#ececec; border-radius:2px;"></div>
+          <div style="height:20px; width:60px; background:#ececec; border-radius:12px; margin-top:4px;"></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="font-size:11px; color:#bbb; text-align:center; margin-top:auto; padding-top:20px;">wireframe — state 2 of 3: loading (cards skeleton while names + domain checks resolve)</div>
+
+</div>
+</x-dc>
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { skeletons: Array.from({length: 10}, (_, i) => ({ id: i })) };
+  }
+}
+</script>
+</body>
+</html>
