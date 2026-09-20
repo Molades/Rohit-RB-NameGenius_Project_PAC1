@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { TLDS, isTldAvailable, placeholderPrice } from '../services/domain.js'
-import { Glyph, gradientFor, VISUAL_FILTER } from './nameVisuals.jsx'
+import { Glow, Glyph } from './nameVisuals.jsx'
 
 const ROUND_BTN =
   'inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border p-0 backdrop-blur-[6px] transition duration-200 active:scale-90'
@@ -56,10 +56,8 @@ export default function NameCard({
       style={{ '--i': revealIndex }}
       className="reveal group overflow-hidden rounded-3xl border border-white/8 bg-[#0d0d0d] shadow-[0_14px_30px_rgba(0,0,0,0.35)] transition-[translate,box-shadow,border-color] duration-500 hover:-translate-y-1 hover:border-white/16 hover:shadow-[0_26px_54px_rgba(0,0,0,0.55)]"
     >
-      <div
-        className={`relative flex h-[168px] items-center justify-center ${VISUAL_FILTER}`}
-        style={{ background: gradientFor(visual) }}
-      >
+      <div className="relative flex h-[168px] items-center justify-center">
+        <Glow visual={visual} />
         <div className="absolute inset-x-4 top-3.5 flex items-center justify-between">
           <span
             key={primaryTld}
@@ -97,7 +95,7 @@ export default function NameCard({
             </button>
           </div>
         </div>
-        <div className="relative z-[1] flex size-16 items-center justify-center rounded-[18px] border border-white/16 bg-[linear-gradient(160deg,#3d3d3d,#161616)] text-hero-text shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_10px_26px_rgba(0,0,0,0.5)]">
+        <div className="relative z-[1] flex size-16 items-center justify-center rounded-[18px] border border-white/16 bg-[rgba(18,18,18,0.55)] text-hero-text shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_10px_26px_rgba(0,0,0,0.35)] backdrop-blur-[10px]">
           <Glyph visual={visual} />
 
         </div>

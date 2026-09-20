@@ -12,6 +12,8 @@ import { generateNames } from './services/gemini.js'
 import { slugify, checkDomainsBatch, placeholderAlternates } from './services/domain.js'
 
 const REGENS_BEFORE_QUESTION = 3
+// Names shown per batch (first generation and every regenerate).
+const BATCH_SIZE = 10
 // The Generating screen stays up at least this long so a fast reply doesn't
 // flash it for a split second.
 const MIN_GENERATING_MS = 1500
@@ -91,14 +93,16 @@ export default function App() {
       clearInterval(creepTimer)
     }
 
-    const seen = new Set()
+    // Skip anything already on screen (or repeated within this reply), then
+    // take a full batch from what is left.
+    const seen = new Set(excludeNames.map(slugify))
     const candidates = []
     for (const name of names) {
       const domain = slugify(name)
       if (!domain || seen.has(domain)) continue
       seen.add(domain)
       candidates.push({ name, domain })
-      if (candidates.length >= 8) break
+      if (candidates.length >= BATCH_SIZE) break
     }
 
     if (candidates.length === 0) {
@@ -113,7 +117,7 @@ export default function App() {
     )
     const statusByDomain = new Map(checked.map((c) => [c.domain, c.status]))
 
-    const batch = candidates.slice(0, 5).map(({ name, domain }) => ({
+    const batch = candidates.map(({ name, domain }) => ({
       name,
       domain,
       status: statusByDomain.get(domain),

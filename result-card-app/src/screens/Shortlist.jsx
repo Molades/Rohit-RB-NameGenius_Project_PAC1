@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import TopBar from '../components/TopBar.jsx'
-import { Glyph, gradientFor, VISUAL_FILTER } from '../components/nameVisuals.jsx'
+import { Glow, Glyph } from '../components/nameVisuals.jsx'
 import { OUTLINE_BTN, PAGE_H1, PANEL } from '../components/ui.js'
 import { TLDS, isTldAvailable, placeholderPrice } from '../services/domain.js'
 
@@ -95,11 +95,9 @@ export default function Shortlist({
               >
                 <div className="min-h-0 overflow-hidden">
                 <div className="group flex flex-wrap items-center gap-x-5 gap-y-4 px-4 py-4 sm:px-5">
-                <div
-                  className={`flex size-16 shrink-0 items-center justify-center rounded-[18px] ${VISUAL_FILTER}`}
-                  style={{ background: gradientFor(visual) }}
-                >
-                  <div className="flex size-9 items-center justify-center rounded-xl border border-white/16 bg-ink/45 text-hero-text backdrop-blur-[6px]">
+                <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-white/10 bg-[#0d0d0d]">
+                  <Glow visual={visual} />
+                  <div className="relative flex size-9 items-center justify-center rounded-xl border border-white/16 bg-ink/45 text-hero-text backdrop-blur-[6px]">
                     <Glyph visual={visual} size={18} />
                   </div>
                 </div>

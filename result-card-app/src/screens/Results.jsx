@@ -126,7 +126,7 @@ export default function Results({
               key={item.domain}
               item={item}
               index={i}
-              revealIndex={1 + (i % 5)}
+              revealIndex={1 + (i % 10) * 0.6}
               primaryTld={primaryTld}
               isShortlisted={shortlist.some((s) => s.domain === item.domain)}
               isCompared={compareSel.some((s) => s.domain === item.domain)}

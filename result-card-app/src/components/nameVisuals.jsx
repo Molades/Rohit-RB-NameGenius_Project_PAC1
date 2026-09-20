@@ -1,11 +1,17 @@
-// The gradient + glyph identity of a name. Each result is given a `visual`
+// The colour + glyph identity of a name. Each result is given a `visual`
 // number when it is created, so it looks the same on every screen.
+
+// Soft light that pours down from the top edge and fades to nothing, so it
+// melts into whatever surface it sits on (no gradient "box", no dark band).
+const light = (bright, deep) =>
+  `radial-gradient(ellipse 80% 105% at 50% 22%, ${bright} 0%, ${deep} 48%, transparent 82%)`
+
 const GRADIENTS = [
-  'radial-gradient(ellipse at 50% 32%, #7b6bff, #3b2bcf 38%, #0a0a0a 75%)',
-  'radial-gradient(ellipse at 50% 32%, #ff9457, #ff3d6b 38%, #0a0a0a 75%)',
-  'radial-gradient(ellipse at 50% 32%, #2dd4bf, #14707a 38%, #0a0a0a 75%)',
-  'radial-gradient(ellipse at 50% 32%, #ec4899, #7c3aed 38%, #0a0a0a 75%)',
-  'radial-gradient(ellipse at 50% 32%, #f5a623, #b23d1f 38%, #0a0a0a 75%)',
+  light('rgba(123,107,255,0.7)', 'rgba(59,43,207,0.3)'),
+  light('rgba(255,148,87,0.62)', 'rgba(255,61,107,0.28)'),
+  light('rgba(45,212,191,0.58)', 'rgba(20,112,122,0.3)'),
+  light('rgba(236,72,153,0.58)', 'rgba(124,58,237,0.3)'),
+  light('rgba(245,166,35,0.58)', 'rgba(178,61,31,0.28)'),
 ]
 
 const GLYPHS = [
@@ -33,6 +39,17 @@ export function Glyph({ visual, size = 26 }) {
   )
 }
 
-// The muted-until-hover treatment used on every gradient visual.
-export const VISUAL_FILTER =
-  '[filter:saturate(0.35)_brightness(0.78)] transition-[filter] duration-[400ms] group-hover:[filter:none] group-focus-within:[filter:none] [@media(hover:none)]:[filter:none]'
+const FADE_OUT = 'linear-gradient(to bottom, #000 50%, transparent 100%)'
+
+// The coloured light behind a name's visual. Put it first inside a `relative`
+// container that sits in a `group`: it rests at a gentle strength and warms up
+// (never jumps to full saturation) when the card is hovered or focused.
+export function Glow({ visual }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 opacity-80 transition-opacity duration-500 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+      style={{ background: gradientFor(visual), WebkitMaskImage: FADE_OUT, maskImage: FADE_OUT }}
+    />
+  )
+}

@@ -1,9 +1,13 @@
 const GEMINI_MODEL = 'gemini-flash-latest'
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 
+// Ask for more names than the UI shows: duplicates and unusable names get
+// dropped, and we still want a full batch left over.
+export const NAMES_REQUESTED = 14
+
 function buildPrompt(brief, excludeNames) {
   const lines = [
-    'Suggest 8 short, ordinary business name ideas for a brand.',
+    `Suggest ${NAMES_REQUESTED} short, ordinary business name ideas for a brand.`,
     brief.name ? `Working name so far: ${brief.name}` : null,
     brief.description ? `Description: ${brief.description}` : null,
     brief.competitors ? `Competitors/keywords: ${brief.competitors}` : null,
@@ -12,7 +16,7 @@ function buildPrompt(brief, excludeNames) {
       ? `Brand discovery answers:\n${brief.answers.map(([q, a]) => `- ${q} ${a}`).join('\n')}`
       : null,
     excludeNames.length ? `Do not repeat any of these: ${excludeNames.join(', ')}` : null,
-    'Respond with ONLY a JSON array of 8 short strings, no other text.',
+    `Respond with ONLY a JSON array of ${NAMES_REQUESTED} short strings, no other text.`,
   ].filter(Boolean)
   return lines.join('\n')
 }
@@ -82,5 +86,5 @@ export async function generateNames(brief, excludeNames = []) {
     throw new Error('Gemini returned no name ideas.')
   }
 
-  return names.slice(0, 8).map((n) => String(n).trim()).filter(Boolean)
+  return names.slice(0, NAMES_REQUESTED).map((n) => String(n).trim()).filter(Boolean)
 }

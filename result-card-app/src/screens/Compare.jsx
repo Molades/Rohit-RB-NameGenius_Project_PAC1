@@ -1,5 +1,5 @@
 import TopBar from '../components/TopBar.jsx'
-import { Glyph, gradientFor, VISUAL_FILTER } from '../components/nameVisuals.jsx'
+import { Glow, Glyph } from '../components/nameVisuals.jsx'
 import { OUTLINE_BTN, PAGE_H1, PANEL } from '../components/ui.js'
 import { isTldAvailable, placeholderPrice } from '../services/domain.js'
 
@@ -48,11 +48,9 @@ function SlotCard({ item, isShortlisted, onToggleShortlist, onRemove, revealInde
   const visual = item.visual ?? 0
   return (
     <article style={{ '--i': revealIndex }} className="reveal group overflow-hidden rounded-3xl border border-white/8 bg-[#0d0d0d] shadow-[0_14px_30px_rgba(0,0,0,0.35)]">
-      <div
-        className={`flex h-[132px] items-center justify-center ${VISUAL_FILTER}`}
-        style={{ background: gradientFor(visual) }}
-      >
-        <div className="flex size-14 items-center justify-center rounded-2xl border border-white/16 bg-[linear-gradient(160deg,#3d3d3d,#161616)] text-hero-text shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_10px_26px_rgba(0,0,0,0.5)]">
+      <div className="relative flex h-[132px] items-center justify-center">
+        <Glow visual={visual} />
+        <div className="relative flex size-14 items-center justify-center rounded-2xl border border-white/16 bg-[rgba(18,18,18,0.55)] text-hero-text shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_10px_26px_rgba(0,0,0,0.35)] backdrop-blur-[10px]">
           <Glyph visual={visual} size={22} />
         </div>
       </div>
