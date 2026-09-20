@@ -1,53 +1,94 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
+import Landing from './screens/Landing.jsx'
 import Brief from './screens/Brief.jsx'
+import Generating from './screens/Generating.jsx'
 import Results from './screens/Results.jsx'
 import Shortlist from './screens/Shortlist.jsx'
 import Compare from './screens/Compare.jsx'
-import QuestionsPanel from './screens/QuestionsPanel.jsx'
+import Questions from './screens/Questions.jsx'
 import { INITIAL_BRIEF, QUESTIONS } from './data.js'
 import { generateNames } from './services/gemini.js'
 import { slugify, checkDomainsBatch, placeholderAlternates } from './services/domain.js'
 
 const REGENS_BEFORE_QUESTION = 3
+// The Generating screen stays up at least this long so a fast reply doesn't
+// flash it for a split second.
+const MIN_GENERATING_MS = 1500
+// How long the bar rests at 100% before the names appear — long enough for the
+// bar's final glide to land and be read.
+const FINISH_HOLD_MS = 600
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const answeredPairs = (answers) =>
+  QUESTIONS.map((q, i) => [q, (answers[i] || '').trim()]).filter(([, a]) => a)
 
 export default function App() {
-  const [view, setView] = useState('brief')
-  const [questionsOpen, setQuestionsOpen] = useState(false)
+  const [view, setView] = useState('landing')
+  // Where the Questions page returns to when the user is done with it.
+  const [questionsFrom, setQuestionsFrom] = useState('results')
 
   const [brief, setBrief] = useState(INITIAL_BRIEF)
   const [results, setResults] = useState([])
-  const [isChecking, setIsChecking] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [error, setError] = useState(null)
-  const [filters, setFilters] = useState({ tld: 'any', length: 'any' })
+  const [primaryTld, setPrimaryTld] = useState('.com')
   const [shortlist, setShortlist] = useState([])
   const [compareSel, setCompareSel] = useState([])
   const [answers, setAnswers] = useState({})
   const [regenCount, setRegenCount] = useState(0)
   const [pendingQuestion, setPendingQuestion] = useState(null)
 
+  // Every screen change goes through here so it gets the crossfade (styled in
+  // index.css). Browsers without View Transitions, and users who prefer
+  // reduced motion, get a plain instant swap.
+  const go = (next) => {
+    if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setView(next)
+      return
+    }
+    document.startViewTransition(() => flushSync(() => setView(next)))
+  }
+
+  // generateBatch can run in the same tick as an answer being saved, so it
+  // reads the latest answers from here rather than from a stale render.
+  const answersRef = useRef(answers)
+  answersRef.current = answers
+
+  const answeredCount = answeredPairs(answers).length
+
   const firstUnanswered = (a) => {
     const idx = QUESTIONS.findIndex((_, i) => !(a[i] || '').trim())
     return idx === -1 ? null : idx
   }
 
-  // Every batch fetch (first generation, regenerate, answering a follow-up, or
-  // retry) goes through here: real Gemini call for name ideas, then a real
-  // RDAP check per resulting domain.
-  const generateBatch = async (excludeNames, onSuccess) => {
-    setIsChecking(true)
+  // One batch: real Gemini call for name ideas, then a real RDAP check per
+  // resulting domain, appended to the list. Returns whether names were added.
+  // Progress is reported as it goes: 0–60% while waiting on Gemini (which gives
+  // no signal of its own, so it eases toward 60), 70% once names are back, then
+  // 70–98% as each domain check finishes.
+  const generateBatch = async (excludeNames, activeBrief) => {
     setError(null)
+    let creep = 3
+    setProgress(creep)
+    const creepTimer = setInterval(() => {
+      creep += (60 - creep) * 0.05
+      setProgress(creep)
+    }, 120)
 
     let names
     try {
-      names = await generateNames(brief, excludeNames)
+      names = await generateNames({ ...activeBrief, answers: answeredPairs(answersRef.current) }, excludeNames)
     } catch (err) {
       setError(
         err.code === 'QUOTA_EXCEEDED'
           ? 'Daily Gemini limit reached — try again tomorrow.'
           : 'Could not generate names. Try again.'
       )
-      setIsChecking(false)
-      return
+      return false
+    } finally {
+      clearInterval(creepTimer)
     }
 
     const seen = new Set()
@@ -62,11 +103,14 @@ export default function App() {
 
     if (candidates.length === 0) {
       setError('Could not generate names. Try again.')
-      setIsChecking(false)
-      return
+      return false
     }
 
-    const checked = await checkDomainsBatch(candidates.map((c) => c.domain))
+    setProgress(70)
+    const checked = await checkDomainsBatch(
+      candidates.map((c) => c.domain),
+      (done, total) => setProgress(70 + (28 * done) / total)
+    )
     const statusByDomain = new Map(checked.map((c) => [c.domain, c.status]))
 
     const batch = candidates.slice(0, 5).map(({ name, domain }) => ({
@@ -76,39 +120,67 @@ export default function App() {
       tlds: placeholderAlternates(name),
     }))
 
-    setResults(batch)
-    setIsChecking(false)
-    onSuccess?.()
+    // `visual` fixes each name's colour/glyph at creation, so it looks the same
+    // on every screen (Names list, Shortlist, Compare).
+    setResults((prev) => {
+      const have = new Set(prev.map((r) => r.domain))
+      const fresh = batch.filter((b) => !have.has(b.domain)).map((b, i) => ({ ...b, visual: prev.length + i }))
+      return [...prev, ...fresh]
+    })
+    return true
+  }
+
+  // Every trigger (Find names, regenerate, a follow-up answer, retry) shows the
+  // Generating screen, then lands on Results — which has its own error/retry
+  // state, so a failed batch still moves on after the minimum time.
+  // activeBrief is passed explicitly by findNames because setBrief hasn't
+  // landed yet in that same render.
+  const runGeneration = async (excludeNames, activeBrief = brief, onSuccess) => {
+    setProgress(0)
+    go('generating')
+    const startedAt = Date.now()
+    const ok = await generateBatch(excludeNames, activeBrief)
+    if (ok) {
+      setProgress(100)
+      onSuccess?.()
+    }
+    const remaining = MIN_GENERATING_MS - (Date.now() - startedAt)
+    await sleep(Math.max(ok ? FINISH_HOLD_MS : 0, remaining))
+    go('results')
   }
 
   const findNames = (values) => {
     setBrief(values)
-    setFilters({ tld: 'any', length: 'any' })
+    setPrimaryTld(values.tld || '.com')
+    setResults([])
     setRegenCount(0)
     setPendingQuestion(null)
-    setView('results')
-    generateBatch([])
+    runGeneration([], values)
   }
 
   const retry = () => {
-    generateBatch(results.map((r) => r.name))
+    runGeneration(results.map((r) => r.name))
   }
 
   const regenerate = () => {
     if (pendingQuestion !== null) return
-    generateBatch(results.map((r) => r.name), () => {
-      setRegenCount((n) => {
-        const next = n + 1
-        if (next >= REGENS_BEFORE_QUESTION) {
-          const idx = firstUnanswered(answers)
-          if (idx !== null) {
-            setPendingQuestion(idx)
-            return 0
+    runGeneration(
+      results.map((r) => r.name),
+      brief,
+      () => {
+        setRegenCount((n) => {
+          const next = n + 1
+          if (next >= REGENS_BEFORE_QUESTION) {
+            const idx = firstUnanswered(answers)
+            if (idx !== null) {
+              setPendingQuestion(idx)
+              return 0
+            }
           }
-        }
-        return next
-      })
-    })
+          return next
+        })
+      }
+    )
   }
 
   const registerSelection = () => setRegenCount(0)
@@ -134,44 +206,46 @@ export default function App() {
   const saveAnswer = (index, value) => setAnswers((a) => ({ ...a, [index]: value }))
 
   const answerFollowUp = (index, value) => {
+    answersRef.current = { ...answers, [index]: value }
     saveAnswer(index, value)
     setPendingQuestion(null)
-    generateBatch(results.map((r) => r.name))
+    runGeneration(results.map((r) => r.name))
   }
 
   const skipFollowUp = () => setPendingQuestion(null)
 
-  return (
-    <div className="min-h-full bg-canvas">
-      <nav className="flex gap-4 border-b border-border bg-paper p-4 font-meta text-[12px]">
-        {['brief', 'results', 'shortlist', 'compare'].map((name) => (
-          <button
-            key={name}
-            onClick={() => setView(name)}
-            className={view === name ? 'font-semibold text-ink' : 'text-meta'}
-          >
-            {name}
-            {name === 'shortlist' && shortlist.length > 0 ? ` (${shortlist.length})` : ''}
-            {name === 'compare' && compareSel.length > 0 ? ` (${compareSel.length})` : ''}
-          </button>
-        ))}
-        <button onClick={() => setQuestionsOpen(true)} className="text-meta">
-          questions{Object.keys(answers).length > 0 ? ` (${Object.keys(answers).length})` : ''}
-        </button>
-      </nav>
+  // draft is the Brief form's unsaved values, kept so leaving it for the
+  // Questions page doesn't lose what was typed.
+  const openQuestions = (draft) => {
+    if (draft) setBrief(draft)
+    if (view !== 'questions') setQuestionsFrom(view)
+    go('questions')
+  }
 
+  const navCounts = { shortlist: shortlist.length, compare: compareSel.length, questions: answeredCount }
+  const nav = { navCounts, onNavigate: go, onOpenQuestions: openQuestions }
+
+  return (
+    <div className="min-h-full bg-ink">
+      {view === 'landing' && <Landing onProceed={() => go('brief')} />}
       {view === 'brief' && (
-        <Brief initial={brief} onFindNames={findNames} onOpenQuestions={() => setQuestionsOpen(true)} />
+        <Brief
+          initial={brief}
+          onFindNames={findNames}
+          onOpenQuestions={openQuestions}
+          onBack={() => go('landing')}
+        />
       )}
+      {view === 'generating' && <Generating progress={progress} />}
       {view === 'results' && (
         <Results
+          {...nav}
           brief={brief}
           results={results}
-          isChecking={isChecking}
           error={error}
           onRetry={retry}
-          filters={filters}
-          onFiltersChange={setFilters}
+          primaryTld={primaryTld}
+          onPrimaryTldChange={setPrimaryTld}
           shortlist={shortlist}
           compareSel={compareSel}
           pendingQuestion={pendingQuestion !== null ? QUESTIONS[pendingQuestion] : null}
@@ -183,14 +257,25 @@ export default function App() {
         />
       )}
       {view === 'shortlist' && (
-        <Shortlist shortlist={shortlist} onRemove={toggleShortlist} onNavigate={setView} />
+        <Shortlist
+          {...nav}
+          shortlist={shortlist}
+          compareSel={compareSel}
+          onRemove={toggleShortlist}
+          onToggleCompare={toggleCompare}
+        />
       )}
       {view === 'compare' && (
-        <Compare compareSel={compareSel} onRemove={toggleCompare} onNavigate={setView} />
+        <Compare
+          {...nav}
+          compareSel={compareSel}
+          shortlist={shortlist}
+          onRemove={toggleCompare}
+          onToggleShortlist={toggleShortlist}
+        />
       )}
-
-      {questionsOpen && (
-        <QuestionsPanel answers={answers} onSave={saveAnswer} onClose={() => setQuestionsOpen(false)} />
+      {view === 'questions' && (
+        <Questions {...nav} answers={answers} onSave={saveAnswer} onDone={() => go(questionsFrom)} />
       )}
     </div>
   )

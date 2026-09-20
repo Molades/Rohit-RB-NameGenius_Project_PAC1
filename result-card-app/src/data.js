@@ -13,5 +13,6 @@ export const INITIAL_BRIEF = {
   name: 'Loom & Carbon',
   description: 'A studio that designs furniture from reclaimed hardwood, built to be repaired, not replaced.',
   competitors: 'Article, Floyd, sustainable, heirloom, modular',
+  mood: 'Warm, tactile, understated — quietly premium, not flashy',
   tld: '.com',
 }

@@ -7,13 +7,17 @@ function buildPrompt(brief, excludeNames) {
     brief.name ? `Working name so far: ${brief.name}` : null,
     brief.description ? `Description: ${brief.description}` : null,
     brief.competitors ? `Competitors/keywords: ${brief.competitors}` : null,
+    brief.mood ? `Nature and mood: ${brief.mood}` : null,
+    brief.answers?.length
+      ? `Brand discovery answers:\n${brief.answers.map(([q, a]) => `- ${q} ${a}`).join('\n')}`
+      : null,
     excludeNames.length ? `Do not repeat any of these: ${excludeNames.join(', ')}` : null,
     'Respond with ONLY a JSON array of 8 short strings, no other text.',
   ].filter(Boolean)
   return lines.join('\n')
 }
 
-const REQUEST_TIMEOUT_MS = 20000
+const REQUEST_TIMEOUT_MS = 12000
 
 export async function generateNames(brief, excludeNames = []) {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY

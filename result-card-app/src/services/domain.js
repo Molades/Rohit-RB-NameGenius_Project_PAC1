@@ -1,6 +1,13 @@
 const RDAP_BASE = 'https://rdap.verisign.com/com/v1/domain/'
 const ALT_TLDS = ['.io', '.ai', '.co']
-const REQUEST_TIMEOUT_MS = 8000
+const REQUEST_TIMEOUT_MS = 4000
+
+export const TLDS = ['.com', '.io', '.ai']
+
+// .com comes from the live RDAP check; every other TLD is a placeholder.
+export function isTldAvailable(item, ext) {
+  return ext === '.com' ? item.status === 'available' : Boolean(item.tlds.find((t) => t.ext === ext)?.available)
+}
 
 export function slugify(name) {
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -22,12 +29,27 @@ export async function checkDomain(domain) {
   }
 }
 
-export async function checkDomainsBatch(domains) {
-  const statuses = await Promise.all(domains.map((d) => checkDomain(d)))
+export async function checkDomainsBatch(domains, onProgress) {
+  let done = 0
+  const statuses = await Promise.all(
+    domains.map(async (d) => {
+      const status = await checkDomain(d)
+      onProgress?.(++done, domains.length)
+      return status
+    })
+  )
   return domains.map((domain, i) => ({ domain, status: statuses[i] }))
 }
 
-// Deterministic, name-seeded placeholders for the non-live "ALSO FREE" row —
+// Illustrative yearly price for the card footer — name-seeded so it's stable
+// across re-renders. There is no registrar pricing source behind it.
+export function placeholderPrice(name) {
+  let seed = 7
+  for (let i = 0; i < name.length; i++) seed = (seed * 31 + name.charCodeAt(i)) >>> 0
+  return `$${9 + (seed % 21)}.99/yr`
+}
+
+// Deterministic, name-seeded placeholders for the non-.com rows —
 // stable across re-renders, but not a real availability check.
 export function placeholderAlternates(name) {
   let seed = 0
