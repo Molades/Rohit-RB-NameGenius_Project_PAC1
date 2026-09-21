@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import Landing from './screens/Landing.jsx'
 import Brief from './screens/Brief.jsx'
@@ -9,7 +9,8 @@ import Compare from './screens/Compare.jsx'
 import Questions from './screens/Questions.jsx'
 import { INITIAL_BRIEF, QUESTIONS } from './data.js'
 import { generateNames } from './services/gemini.js'
-import { slugify, checkDomainsBatch, placeholderAlternates } from './services/domain.js'
+import { slugify, checkDomainsBatch, TLDS } from './services/domain.js'
+import { preloadPrices } from './services/pricing.js'
 
 const REGENS_BEFORE_QUESTION = 3
 // Names shown per batch (first generation and every regenerate).
@@ -60,6 +61,12 @@ export default function App() {
     }
     document.startViewTransition(() => flushSync(() => setView(next)))
   }
+
+  // Prices come from a slow feed, so start fetching as soon as the form opens —
+  // by the time names are generated they are usually ready.
+  useEffect(() => {
+    if (view === 'brief') preloadPrices()
+  }, [view])
 
   // generateBatch can run in the same tick as an answer being saved, so it
   // reads the latest answers from here rather than from a stale render.
@@ -122,9 +129,12 @@ export default function App() {
       return null
     }
 
+    // Every name is checked on every TLD we show, so the whole batch is one
+    // set of parallel registry lookups. `domain` is the .com (the name's key).
+    const slugOf = (domain) => domain.replace(/.com$/, '')
     report(70)
     const checked = await checkDomainsBatch(
-      candidates.map((c) => c.domain),
+      candidates.flatMap((c) => TLDS.map((ext) => slugOf(c.domain) + ext)),
       (done, total) => report(70 + (28 * done) / total)
     )
     const statusByDomain = new Map(checked.map((c) => [c.domain, c.status]))
@@ -133,7 +143,10 @@ export default function App() {
       name,
       domain,
       status: statusByDomain.get(domain),
-      tlds: placeholderAlternates(name),
+      tlds: TLDS.filter((ext) => ext !== '.com').map((ext) => ({
+        ext,
+        available: statusByDomain.get(slugOf(domain) + ext) === 'available',
+      })),
     }))
   }
 
@@ -153,6 +166,7 @@ export default function App() {
   // landed yet in that same render.
   const runGeneration = async (excludeNames, activeBrief = brief, onSuccess) => {
     const run = ++genRun.current
+    preloadPrices()
     setRegenerating(false)
     setProgress(0)
     go('generating')

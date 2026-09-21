@@ -2,7 +2,7 @@ import { useState } from 'react'
 import TopBar from '../components/TopBar.jsx'
 import { Glow, Glyph } from '../components/nameVisuals.jsx'
 import { OUTLINE_BTN, PAGE_H1, PANEL } from '../components/ui.js'
-import { TLDS, isTldAvailable, placeholderPrice } from '../services/domain.js'
+import { TLDS, isTldAvailable } from '../services/domain.js'
 
 const ROW_BTN =
   'inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full border px-3.5 font-hero-mono text-[12px] transition duration-200 active:scale-95'
@@ -124,10 +124,6 @@ export default function Shortlist({
                     )
                   })}
                 </div>
-
-                <span className="w-[76px] shrink-0 font-hero-mono text-[13px] text-hero-text/55">
-                  {placeholderPrice(item.name)}
-                </span>
 
                 <div className="flex items-center gap-2">
                   <button

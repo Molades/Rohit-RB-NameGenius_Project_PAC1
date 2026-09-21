@@ -1,5 +1,12 @@
-const RDAP_BASE = 'https://rdap.verisign.com/com/v1/domain/'
-const ALT_TLDS = ['.io', '.ai', '.co']
+// Each TLD's registry publishes an RDAP service: a 404 means the name is
+// unregistered, a 200 means it is taken. .io and .ai are both run by Identity
+// Digital (per the IANA RDAP bootstrap). All three allow browser requests.
+const IDENTITY_DIGITAL = 'https://rdap.identitydigital.services/rdap/domain/'
+const RDAP_BASES = {
+  '.com': 'https://rdap.verisign.com/com/v1/domain/',
+  '.io': IDENTITY_DIGITAL,
+  '.ai': IDENTITY_DIGITAL,
+}
 const REQUEST_TIMEOUT_MS = 4000
 // The single retry is shorter, so a domain that never answers adds at most
 // ~4.5s (delay + jitter + retry) to the Generating screen.
@@ -9,7 +16,7 @@ const RETRY_JITTER_MS = 600
 
 export const TLDS = ['.com', '.io', '.ai']
 
-// .com comes from the live RDAP check; every other TLD is a placeholder.
+// .com is item.status; the other TLDs are in item.tlds. All come from live RDAP checks.
 export function isTldAvailable(item, ext) {
   return ext === '.com' ? item.status === 'available' : Boolean(item.tlds.find((t) => t.ext === ext)?.available)
 }
@@ -22,8 +29,10 @@ export function slugify(name) {
 // One RDAP lookup. Only a 404 (available) or 200 (registered) is an answer;
 // a timeout, network error, rate limit (429) or server error is 'unknown'.
 async function lookup(domain, timeoutMs) {
+  const base = RDAP_BASES[domain.slice(domain.lastIndexOf('.'))]
+  if (!base) return 'unknown'
   try {
-    const res = await fetch(RDAP_BASE + encodeURIComponent(domain), {
+    const res = await fetch(base + encodeURIComponent(domain), {
       headers: { Accept: 'application/rdap+json' },
       signal: AbortSignal.timeout(timeoutMs),
     })
@@ -61,23 +70,4 @@ export async function checkDomainsBatch(domains, onProgress) {
     })
   )
   return domains.map((domain, i) => ({ domain, status: statuses[i] }))
-}
-
-// Illustrative yearly price for the card footer — name-seeded so it's stable
-// across re-renders. There is no registrar pricing source behind it.
-export function placeholderPrice(name) {
-  let seed = 7
-  for (let i = 0; i < name.length; i++) seed = (seed * 31 + name.charCodeAt(i)) >>> 0
-  return `$${9 + (seed % 21)}.99/yr`
-}
-
-// Deterministic, name-seeded placeholders for the non-.com rows —
-// stable across re-renders, but not a real availability check.
-export function placeholderAlternates(name) {
-  let seed = 0
-  for (let i = 0; i < name.length; i++) seed = (seed * 31 + name.charCodeAt(i)) >>> 0
-  return ALT_TLDS.map((ext, i) => {
-    seed = (seed * 1103515245 + 12345 + i) >>> 0
-    return { ext, available: seed % 2 === 0 }
-  })
 }

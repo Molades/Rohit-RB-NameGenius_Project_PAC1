@@ -1,7 +1,7 @@
 import TopBar from '../components/TopBar.jsx'
 import { Glow, Glyph } from '../components/nameVisuals.jsx'
 import { OUTLINE_BTN, PAGE_H1, PANEL } from '../components/ui.js'
-import { isTldAvailable, placeholderPrice } from '../services/domain.js'
+import { isTldAvailable } from '../services/domain.js'
 
 const SLOT_BTN =
   'inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-full border px-4 font-hero-mono text-[12px] transition duration-200 active:scale-95'
@@ -38,9 +38,20 @@ function buildRows(a, b) {
       render: (item) => `${lengthOf(item)} characters`,
       winner: better(lengthOf(a), lengthOf(b), false),
     },
-    { key: 'io', label: '.io', render: status('.io') },
-    { key: 'ai', label: '.ai', render: status('.ai') },
-    { key: 'price', label: 'Price / yr', render: (item) => placeholderPrice(item.name) },
+    {
+      key: 'io',
+      label: '.io',
+      live: true,
+      render: status('.io'),
+      winner: better(Number(isTldAvailable(a, '.io')), Number(isTldAvailable(b, '.io'))),
+    },
+    {
+      key: 'ai',
+      label: '.ai',
+      live: true,
+      render: status('.ai'),
+      winner: better(Number(isTldAvailable(a, '.ai')), Number(isTldAvailable(b, '.ai'))),
+    },
   ]
 }
 
@@ -211,7 +222,7 @@ export default function Compare({
               </div>
             </div>
             <p style={{ '--i': 5 }} className="reveal mt-4 font-hero-mono text-[11px] leading-normal text-hero-text/35">
-              Live: .com availability is a real registry lookup. Sample: .io, .ai and price are illustrative.
+              Availability for .com, .io and .ai comes from a live lookup at each registry when the names are generated.
             </p>
           </>
         )}

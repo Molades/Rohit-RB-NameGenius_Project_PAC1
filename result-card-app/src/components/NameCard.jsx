@@ -1,19 +1,13 @@
 import { useState } from 'react'
-import { TLDS, isTldAvailable, placeholderPrice } from '../services/domain.js'
+import { TLDS, isTldAvailable } from '../services/domain.js'
+import { formatPrice, useTldPrices } from '../services/pricing.js'
 import { Glow, Glyph } from './nameVisuals.jsx'
+import RegisterMenu from './RegisterMenu.jsx'
 
 const ROUND_BTN =
   'inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border p-0 backdrop-blur-[6px] transition duration-200 active:scale-90'
 const ROUND_BTN_IDLE = 'border-white/18 bg-ink/45 text-white/85 hover:border-white/40 hover:bg-ink/65 hover:text-hero-text'
 const ROUND_BTN_ON = 'border-white/50 bg-hero-fill text-ink'
-
-function ArrowOut() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M4 12L12 4M12 4H5M12 4V11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
 
 export default function NameCard({
   item,
@@ -26,6 +20,7 @@ export default function NameCard({
   onToggleCompare,
 }) {
   const [copied, setCopied] = useState(false)
+  const prices = useTldPrices()
 
   const slug = item.domain.replace(/\.com$/, '')
   const isAvailable = (ext) => isTldAvailable(item, ext)
@@ -46,10 +41,7 @@ export default function NameCard({
   }
 
   const ctaHover =
-    'group-hover:pr-3.5 group-focus-within:pr-3.5 ' +
-    (primaryAvailable
-      ? 'group-hover:bg-hero-fill group-hover:text-ink group-focus-within:bg-hero-fill group-focus-within:text-ink'
-      : 'group-hover:border-white/30 group-hover:bg-transparent group-focus-within:border-white/30 group-focus-within:bg-transparent')
+    'group-hover:pr-3.5 group-focus-within:pr-3.5 group-hover:bg-hero-fill group-hover:text-ink group-focus-within:bg-hero-fill group-focus-within:text-ink'
 
   return (
     <article
@@ -144,18 +136,22 @@ export default function NameCard({
 
         <hr className="mb-3.5 mt-4 border-0 border-t border-white/8" />
         <div className="flex items-center justify-between">
-          <span className="font-hero-mono text-[13px] text-hero-text/55">{placeholderPrice(item.name)}</span>
-          <button
-            type="button"
-            className={`inline-flex h-[30px] cursor-pointer items-center overflow-hidden rounded-full border border-transparent bg-white/7 p-0 text-hero-text transition-[background,padding,color,border-color] duration-[250ms] ${ctaHover}`}
-          >
-            <span className="flex size-[30px] shrink-0 items-center justify-center">
-              <ArrowOut />
+          {primaryAvailable ? (
+            <>
+              <span
+                key={primaryTld}
+                title="Typical first-year price. Renewals and premium names can cost more; the registrar sets the final price."
+                className="fade-swap font-hero-mono text-[13px] text-hero-text/55"
+              >
+                {formatPrice(prices, primaryTld) ?? 'Price at registrar'}
+              </span>
+              <RegisterMenu domain={primaryDomain} hoverClass={ctaHover} />
+            </>
+          ) : (
+            <span className="ml-auto inline-flex h-[30px] items-center rounded-full bg-white/5 px-3.5 font-meta text-[12px] font-semibold text-hero-text/40">
+              Taken
             </span>
-            <span className="max-w-0 overflow-hidden whitespace-nowrap font-meta text-[12px] font-semibold opacity-0 transition-[max-width,opacity] duration-300 group-hover:max-w-[140px] group-hover:opacity-100 group-focus-within:max-w-[140px] group-focus-within:opacity-100">
-              {primaryAvailable ? 'Register' : 'Taken'}
-            </span>
-          </button>
+          )}
         </div>
       </div>
     </article>
