@@ -20,6 +20,9 @@ const MIN_GENERATING_MS = 1500
 // How long the bar rests at 100% before the names appear — long enough for the
 // bar's final glide to land and be read.
 const FINISH_HOLD_MS = 600
+// An in-place regenerate keeps its spinner up at least this long, so a fast
+// reply reads as "working" rather than a flicker.
+const MIN_REGEN_MS = 900
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -41,6 +44,11 @@ export default function App() {
   const [answers, setAnswers] = useState({})
   const [regenCount, setRegenCount] = useState(0)
   const [pendingQuestion, setPendingQuestion] = useState(null)
+  // True while "Regenerate more" is fetching in place on the Names list.
+  const [regenerating, setRegenerating] = useState(false)
+  // Each generation takes a number; if a newer one starts (say a new brief while
+  // a regenerate is still in flight), the older one drops its result.
+  const genRun = useRef(0)
 
   // Every screen change goes through here so it gets the crossfade (styled in
   // index.css). Browsers without View Transitions, and users who prefer
@@ -66,29 +74,33 @@ export default function App() {
   }
 
   // One batch: real Gemini call for name ideas, then a real RDAP check per
-  // resulting domain, appended to the list. Returns whether names were added.
-  // Progress is reported as it goes: 0–60% while waiting on Gemini (which gives
-  // no signal of its own, so it eases toward 60), 70% once names are back, then
-  // 70–98% as each domain check finishes.
-  const generateBatch = async (excludeNames, activeBrief) => {
+  // resulting domain. Returns the batch (append it with commitBatch), or null
+  // if it failed or was superseded.
+  // Progress goes to `report` as it runs: 0–60% while waiting on Gemini (which
+  // gives no signal of its own, so it eases toward 60), 70% once names are back,
+  // then 70–98% as each domain check finishes.
+  const generateBatch = async (excludeNames, activeBrief, run, report = () => {}) => {
+    const current = () => genRun.current === run
     setError(null)
     let creep = 3
-    setProgress(creep)
+    report(creep)
     const creepTimer = setInterval(() => {
       creep += (60 - creep) * 0.05
-      setProgress(creep)
+      report(creep)
     }, 120)
 
     let names
     try {
       names = await generateNames({ ...activeBrief, answers: answeredPairs(answersRef.current) }, excludeNames)
     } catch (err) {
-      setError(
-        err.code === 'QUOTA_EXCEEDED'
-          ? 'Daily Gemini limit reached — try again tomorrow.'
-          : 'Could not generate names. Try again.'
-      )
-      return false
+      if (current()) {
+        setError(
+          err.code === 'QUOTA_EXCEEDED'
+            ? 'Daily Gemini limit reached — try again tomorrow.'
+            : 'Could not generate names. Try again.'
+        )
+      }
+      return null
     } finally {
       clearInterval(creepTimer)
     }
@@ -106,33 +118,33 @@ export default function App() {
     }
 
     if (candidates.length === 0) {
-      setError('Could not generate names. Try again.')
-      return false
+      if (current()) setError('Could not generate names. Try again.')
+      return null
     }
 
-    setProgress(70)
+    report(70)
     const checked = await checkDomainsBatch(
       candidates.map((c) => c.domain),
-      (done, total) => setProgress(70 + (28 * done) / total)
+      (done, total) => report(70 + (28 * done) / total)
     )
     const statusByDomain = new Map(checked.map((c) => [c.domain, c.status]))
 
-    const batch = candidates.map(({ name, domain }) => ({
+    return candidates.map(({ name, domain }) => ({
       name,
       domain,
       status: statusByDomain.get(domain),
       tlds: placeholderAlternates(name),
     }))
+  }
 
-    // `visual` fixes each name's colour/glyph at creation, so it looks the same
-    // on every screen (Names list, Shortlist, Compare).
+  // `visual` fixes each name's colour/glyph at creation, so it looks the same
+  // on every screen (Names list, Shortlist, Compare).
+  const commitBatch = (batch) =>
     setResults((prev) => {
       const have = new Set(prev.map((r) => r.domain))
       const fresh = batch.filter((b) => !have.has(b.domain)).map((b, i) => ({ ...b, visual: prev.length + i }))
       return [...prev, ...fresh]
     })
-    return true
-  }
 
   // Every trigger (Find names, regenerate, a follow-up answer, retry) shows the
   // Generating screen, then lands on Results — which has its own error/retry
@@ -140,16 +152,21 @@ export default function App() {
   // activeBrief is passed explicitly by findNames because setBrief hasn't
   // landed yet in that same render.
   const runGeneration = async (excludeNames, activeBrief = brief, onSuccess) => {
+    const run = ++genRun.current
+    setRegenerating(false)
     setProgress(0)
     go('generating')
     const startedAt = Date.now()
-    const ok = await generateBatch(excludeNames, activeBrief)
-    if (ok) {
+    const batch = await generateBatch(excludeNames, activeBrief, run, setProgress)
+    if (genRun.current !== run) return
+    if (batch) {
+      commitBatch(batch)
       setProgress(100)
       onSuccess?.()
     }
     const remaining = MIN_GENERATING_MS - (Date.now() - startedAt)
-    await sleep(Math.max(ok ? FINISH_HOLD_MS : 0, remaining))
+    await sleep(Math.max(batch ? FINISH_HOLD_MS : 0, remaining))
+    if (genRun.current !== run) return
     go('results')
   }
 
@@ -166,25 +183,42 @@ export default function App() {
     runGeneration(results.map((r) => r.name))
   }
 
-  const regenerate = () => {
-    if (pendingQuestion !== null) return
-    runGeneration(
+  // Every third regenerate without a shortlist/compare action surfaces the next
+  // unanswered brand question.
+  const noteRegeneration = () => {
+    setRegenCount((n) => {
+      const next = n + 1
+      if (next >= REGENS_BEFORE_QUESTION) {
+        const idx = firstUnanswered(answers)
+        if (idx !== null) {
+          setPendingQuestion(idx)
+          return 0
+        }
+      }
+      return next
+    })
+  }
+
+  // "Regenerate more" stays on the Names list: the button shows its own busy
+  // state, and the new names are appended below when they arrive. A failure
+  // leaves the list as it was and shows the error banner (with Try again).
+  const regenerate = async () => {
+    if (pendingQuestion !== null || regenerating) return
+    const run = ++genRun.current
+    setRegenerating(true)
+    const startedAt = Date.now()
+    const batch = await generateBatch(
       results.map((r) => r.name),
       brief,
-      () => {
-        setRegenCount((n) => {
-          const next = n + 1
-          if (next >= REGENS_BEFORE_QUESTION) {
-            const idx = firstUnanswered(answers)
-            if (idx !== null) {
-              setPendingQuestion(idx)
-              return 0
-            }
-          }
-          return next
-        })
-      }
+      run
     )
+    await sleep(Math.max(0, MIN_REGEN_MS - (Date.now() - startedAt)))
+    if (genRun.current !== run) return
+    if (batch) {
+      commitBatch(batch)
+      noteRegeneration()
+    }
+    setRegenerating(false)
   }
 
   const registerSelection = () => setRegenCount(0)
@@ -253,6 +287,7 @@ export default function App() {
           shortlist={shortlist}
           compareSel={compareSel}
           pendingQuestion={pendingQuestion !== null ? QUESTIONS[pendingQuestion] : null}
+          regenerating={regenerating}
           onRegenerate={regenerate}
           onToggleShortlist={toggleShortlist}
           onToggleCompare={toggleCompare}
