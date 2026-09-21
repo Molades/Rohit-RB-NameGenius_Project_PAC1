@@ -152,6 +152,21 @@ body { margin: 0; background: var(--color-ink); }
     transform: scale(1.06);
   }
 }
+/* Brief screen: the one-off sheen across "Fill an example", and the small pop
+   when an example picks a TLD. (Outside @theme so they are always emitted.) */
+@keyframes magic-sheen {
+  from {
+    translate: -120% 0;
+  }
+  to {
+    translate: 120% 0;
+  }
+}
+@keyframes pop {
+  40% {
+    transform: scale(1.12);
+  }
+}
 .reveal {
   animation: rise 800ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
   animation-delay: calc(80ms + var(--i, 0) * 70ms);

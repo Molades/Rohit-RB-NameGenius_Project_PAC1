@@ -8,6 +8,7 @@ export const NAMES_REQUESTED = 14
 function buildPrompt(brief, excludeNames) {
   const lines = [
     `Suggest ${NAMES_REQUESTED} short, ordinary business name ideas for a brand.`,
+    brief.businessType ? `Type of business: ${brief.businessType}` : null,
     brief.name ? `Working name so far: ${brief.name}` : null,
     brief.description ? `Description: ${brief.description}` : null,
     brief.competitors ? `Competitors/keywords: ${brief.competitors}` : null,
