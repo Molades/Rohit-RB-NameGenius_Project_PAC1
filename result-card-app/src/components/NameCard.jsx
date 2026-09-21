@@ -153,7 +153,7 @@ export default function NameCard({
               <ArrowOut />
             </span>
             <span className="max-w-0 overflow-hidden whitespace-nowrap font-meta text-[12px] font-semibold opacity-0 transition-[max-width,opacity] duration-300 group-hover:max-w-[140px] group-hover:opacity-100 group-focus-within:max-w-[140px] group-focus-within:opacity-100">
-              {primaryAvailable ? 'Register' : 'Whois'}
+              {primaryAvailable ? 'Register' : 'Taken'}
             </span>
           </button>
         </div>

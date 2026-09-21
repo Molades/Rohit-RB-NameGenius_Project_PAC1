@@ -1,6 +1,11 @@
 const RDAP_BASE = 'https://rdap.verisign.com/com/v1/domain/'
 const ALT_TLDS = ['.io', '.ai', '.co']
 const REQUEST_TIMEOUT_MS = 4000
+// The single retry is shorter, so a domain that never answers adds at most
+// ~4.5s (delay + jitter + retry) to the Generating screen.
+const RETRY_TIMEOUT_MS = 3000
+const RETRY_DELAY_MS = 400
+const RETRY_JITTER_MS = 600
 
 export const TLDS = ['.com', '.io', '.ai']
 
@@ -14,19 +19,36 @@ export function slugify(name) {
   return slug ? `${slug}.com` : null
 }
 
-export async function checkDomain(domain) {
+// One RDAP lookup. Only a 404 (available) or 200 (registered) is an answer;
+// a timeout, network error, rate limit (429) or server error is 'unknown'.
+async function lookup(domain, timeoutMs) {
   try {
     const res = await fetch(RDAP_BASE + encodeURIComponent(domain), {
       headers: { Accept: 'application/rdap+json' },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
     })
     if (res.status === 404) return 'available'
-    return 'taken'
+    if (res.status === 200) return 'taken'
+    return 'unknown'
   } catch {
-    // Timeout, network error, or any non-200/404 status — fail closed rather
-    // than risk showing a taken domain as available.
-    return 'taken'
+    return 'unknown'
   }
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+export async function checkDomain(domain) {
+  const first = await lookup(domain, REQUEST_TIMEOUT_MS)
+  if (first !== 'unknown') return first
+
+  // A batch fires every lookup at once, so a failure is usually a blip or a
+  // rate limit rather than a real answer. Retry once, after a short random
+  // pause so the retries don't all land together.
+  await sleep(RETRY_DELAY_MS + Math.random() * RETRY_JITTER_MS)
+  const second = await lookup(domain, RETRY_TIMEOUT_MS)
+
+  // Still no answer: fail closed rather than risk offering a taken domain.
+  return second === 'unknown' ? 'taken' : second
 }
 
 export async function checkDomainsBatch(domains, onProgress) {
