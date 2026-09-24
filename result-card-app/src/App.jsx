@@ -1,83 +1,238 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
+import Landing from './screens/Landing.jsx'
 import Brief from './screens/Brief.jsx'
+import Generating from './screens/Generating.jsx'
 import Results from './screens/Results.jsx'
 import Shortlist from './screens/Shortlist.jsx'
 import Compare from './screens/Compare.jsx'
-import QuestionsPanel from './screens/QuestionsPanel.jsx'
-import { CANDIDATE_POOL, INITIAL_BRIEF, QUESTIONS, pickBatch } from './data.js'
+import Questions from './screens/Questions.jsx'
+import { INITIAL_BRIEF, QUESTIONS } from './data.js'
+import { generateNames } from './services/gemini.js'
+import { slugify, checkDomainsBatch, TLDS } from './services/domain.js'
+import { preloadPrices } from './services/pricing.js'
 
 const REGENS_BEFORE_QUESTION = 3
-// Mocked domain-check delay + failure rate — stands in for the real RDAP call's
-// loading/error states (Phase 3) without an actual network request.
-const CHECK_DELAY_MS = 700
-const SIMULATED_FAILURE_RATE = 0.15
+// Names shown per batch (first generation and every regenerate).
+const BATCH_SIZE = 10
+// The Generating screen stays up at least this long so a fast reply doesn't
+// flash it for a split second.
+const MIN_GENERATING_MS = 1500
+// How long the bar rests at 100% before the names appear — long enough for the
+// bar's final glide to land and be read.
+const FINISH_HOLD_MS = 600
+// An in-place regenerate keeps its spinner up at least this long, so a fast
+// reply reads as "working" rather than a flicker.
+const MIN_REGEN_MS = 900
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const answeredPairs = (answers) =>
+  QUESTIONS.map((q, i) => [q, (answers[i] || '').trim()]).filter(([, a]) => a)
 
 export default function App() {
-  const [view, setView] = useState('brief')
-  const [questionsOpen, setQuestionsOpen] = useState(false)
+  const [view, setView] = useState('landing')
+  // Where the Questions page returns to when the user is done with it.
+  const [questionsFrom, setQuestionsFrom] = useState('results')
 
   const [brief, setBrief] = useState(INITIAL_BRIEF)
-  const [results, setResults] = useState(() => pickBatch(CANDIDATE_POOL))
-  const [isChecking, setIsChecking] = useState(false)
+  const [results, setResults] = useState([])
+  const [progress, setProgress] = useState(0)
   const [error, setError] = useState(null)
-  const [filters, setFilters] = useState({ tld: 'any', length: 'any' })
+  const [primaryTld, setPrimaryTld] = useState('.com')
   const [shortlist, setShortlist] = useState([])
   const [compareSel, setCompareSel] = useState([])
   const [answers, setAnswers] = useState({})
   const [regenCount, setRegenCount] = useState(0)
   const [pendingQuestion, setPendingQuestion] = useState(null)
+  // True while "Regenerate more" is fetching in place on the Names list.
+  const [regenerating, setRegenerating] = useState(false)
+  // Each generation takes a number; if a newer one starts (say a new brief while
+  // a regenerate is still in flight), the older one drops its result.
+  const genRun = useRef(0)
+
+  // Every screen change goes through here so it gets the crossfade (styled in
+  // index.css). Browsers without View Transitions, and users who prefer
+  // reduced motion, get a plain instant swap.
+  const go = (next) => {
+    if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setView(next)
+      return
+    }
+    document.startViewTransition(() => flushSync(() => setView(next)))
+  }
+
+  // Prices come from a slow feed, so start fetching as soon as the form opens —
+  // by the time names are generated they are usually ready.
+  useEffect(() => {
+    if (view === 'brief') preloadPrices()
+  }, [view])
+
+  // generateBatch can run in the same tick as an answer being saved, so it
+  // reads the latest answers from here rather than from a stale render.
+  const answersRef = useRef(answers)
+  answersRef.current = answers
+
+  const answeredCount = answeredPairs(answers).length
 
   const firstUnanswered = (a) => {
     const idx = QUESTIONS.findIndex((_, i) => !(a[i] || '').trim())
     return idx === -1 ? null : idx
   }
 
-  // Every batch fetch (first generation, regenerate, or answering a follow-up)
-  // goes through here: a brief "checking" state, then either a fresh batch or
-  // a simulated failure — the same shape a real RDAP call would have.
-  const runBatch = (excludeDomains, onSuccess) => {
-    setIsChecking(true)
+  // One batch: real Gemini call for name ideas, then a real RDAP check per
+  // resulting domain. Returns the batch (append it with commitBatch), or null
+  // if it failed or was superseded.
+  // Progress goes to `report` as it runs: 0–60% while waiting on Gemini (which
+  // gives no signal of its own, so it eases toward 60), 70% once names are back,
+  // then 70–98% as each domain check finishes.
+  const generateBatch = async (excludeNames, activeBrief, run, report = () => {}) => {
+    const current = () => genRun.current === run
     setError(null)
-    setTimeout(() => {
-      if (Math.random() < SIMULATED_FAILURE_RATE) {
-        setError('Domain check failed. Try again.')
-        setIsChecking(false)
-        return
+    let creep = 3
+    report(creep)
+    const creepTimer = setInterval(() => {
+      creep += (60 - creep) * 0.05
+      report(creep)
+    }, 120)
+
+    let names
+    try {
+      names = await generateNames({ ...activeBrief, answers: answeredPairs(answersRef.current) }, excludeNames)
+    } catch (err) {
+      if (current()) {
+        setError(
+          err.code === 'QUOTA_EXCEEDED'
+            ? 'Daily Gemini limit reached — try again tomorrow.'
+            : 'Could not generate names. Try again.'
+        )
       }
-      setResults(pickBatch(CANDIDATE_POOL, excludeDomains))
-      setIsChecking(false)
+      return null
+    } finally {
+      clearInterval(creepTimer)
+    }
+
+    // Skip anything already on screen (or repeated within this reply), then
+    // take a full batch from what is left.
+    const seen = new Set(excludeNames.map(slugify))
+    const candidates = []
+    for (const name of names) {
+      const domain = slugify(name)
+      if (!domain || seen.has(domain)) continue
+      seen.add(domain)
+      candidates.push({ name, domain })
+      if (candidates.length >= BATCH_SIZE) break
+    }
+
+    if (candidates.length === 0) {
+      if (current()) setError('Could not generate names. Try again.')
+      return null
+    }
+
+    // Every name is checked on every TLD we show, so the whole batch is one
+    // set of parallel registry lookups. `domain` is the .com (the name's key).
+    const slugOf = (domain) => domain.replace(/.com$/, '')
+    report(70)
+    const checked = await checkDomainsBatch(
+      candidates.flatMap((c) => TLDS.map((ext) => slugOf(c.domain) + ext)),
+      (done, total) => report(70 + (28 * done) / total)
+    )
+    const statusByDomain = new Map(checked.map((c) => [c.domain, c.status]))
+
+    return candidates.map(({ name, domain }) => ({
+      name,
+      domain,
+      status: statusByDomain.get(domain),
+      tlds: TLDS.filter((ext) => ext !== '.com').map((ext) => ({
+        ext,
+        available: statusByDomain.get(slugOf(domain) + ext) === 'available',
+      })),
+    }))
+  }
+
+  // `visual` fixes each name's colour/glyph at creation, so it looks the same
+  // on every screen (Names list, Shortlist, Compare).
+  const commitBatch = (batch) =>
+    setResults((prev) => {
+      const have = new Set(prev.map((r) => r.domain))
+      const fresh = batch.filter((b) => !have.has(b.domain)).map((b, i) => ({ ...b, visual: prev.length + i }))
+      return [...prev, ...fresh]
+    })
+
+  // Every trigger (Find names, regenerate, a follow-up answer, retry) shows the
+  // Generating screen, then lands on Results — which has its own error/retry
+  // state, so a failed batch still moves on after the minimum time.
+  // activeBrief is passed explicitly by findNames because setBrief hasn't
+  // landed yet in that same render.
+  const runGeneration = async (excludeNames, activeBrief = brief, onSuccess) => {
+    const run = ++genRun.current
+    preloadPrices()
+    setRegenerating(false)
+    setProgress(0)
+    go('generating')
+    const startedAt = Date.now()
+    const batch = await generateBatch(excludeNames, activeBrief, run, setProgress)
+    if (genRun.current !== run) return
+    if (batch) {
+      commitBatch(batch)
+      setProgress(100)
       onSuccess?.()
-    }, CHECK_DELAY_MS)
+    }
+    const remaining = MIN_GENERATING_MS - (Date.now() - startedAt)
+    await sleep(Math.max(batch ? FINISH_HOLD_MS : 0, remaining))
+    if (genRun.current !== run) return
+    go('results')
   }
 
   const findNames = (values) => {
     setBrief(values)
-    setFilters({ tld: 'any', length: 'any' })
+    setPrimaryTld(values.tld || '.com')
+    setResults([])
     setRegenCount(0)
     setPendingQuestion(null)
-    setView('results')
-    runBatch([])
+    runGeneration([], values)
   }
 
   const retry = () => {
-    runBatch(results.map((r) => r.domain))
+    runGeneration(results.map((r) => r.name))
   }
 
-  const regenerate = () => {
-    if (pendingQuestion !== null) return
-    runBatch(results.map((r) => r.domain), () => {
-      setRegenCount((n) => {
-        const next = n + 1
-        if (next >= REGENS_BEFORE_QUESTION) {
-          const idx = firstUnanswered(answers)
-          if (idx !== null) {
-            setPendingQuestion(idx)
-            return 0
-          }
+  // Every third regenerate without a shortlist/compare action surfaces the next
+  // unanswered brand question.
+  const noteRegeneration = () => {
+    setRegenCount((n) => {
+      const next = n + 1
+      if (next >= REGENS_BEFORE_QUESTION) {
+        const idx = firstUnanswered(answers)
+        if (idx !== null) {
+          setPendingQuestion(idx)
+          return 0
         }
-        return next
-      })
+      }
+      return next
     })
+  }
+
+  // "Regenerate more" stays on the Names list: the button shows its own busy
+  // state, and the new names are appended below when they arrive. A failure
+  // leaves the list as it was and shows the error banner (with Try again).
+  const regenerate = async () => {
+    if (pendingQuestion !== null || regenerating) return
+    const run = ++genRun.current
+    setRegenerating(true)
+    const startedAt = Date.now()
+    const batch = await generateBatch(
+      results.map((r) => r.name),
+      brief,
+      run
+    )
+    await sleep(Math.max(0, MIN_REGEN_MS - (Date.now() - startedAt)))
+    if (genRun.current !== run) return
+    if (batch) {
+      commitBatch(batch)
+      noteRegeneration()
+    }
+    setRegenerating(false)
   }
 
   const registerSelection = () => setRegenCount(0)
@@ -103,47 +258,50 @@ export default function App() {
   const saveAnswer = (index, value) => setAnswers((a) => ({ ...a, [index]: value }))
 
   const answerFollowUp = (index, value) => {
+    answersRef.current = { ...answers, [index]: value }
     saveAnswer(index, value)
     setPendingQuestion(null)
-    runBatch(results.map((r) => r.domain))
+    runGeneration(results.map((r) => r.name))
   }
 
   const skipFollowUp = () => setPendingQuestion(null)
 
-  return (
-    <div className="min-h-full bg-canvas">
-      <nav className="flex gap-4 border-b border-border bg-paper p-4 font-meta text-[12px]">
-        {['brief', 'results', 'shortlist', 'compare'].map((name) => (
-          <button
-            key={name}
-            onClick={() => setView(name)}
-            className={view === name ? 'font-semibold text-ink' : 'text-meta'}
-          >
-            {name}
-            {name === 'shortlist' && shortlist.length > 0 ? ` (${shortlist.length})` : ''}
-            {name === 'compare' && compareSel.length > 0 ? ` (${compareSel.length})` : ''}
-          </button>
-        ))}
-        <button onClick={() => setQuestionsOpen(true)} className="text-meta">
-          questions{Object.keys(answers).length > 0 ? ` (${Object.keys(answers).length})` : ''}
-        </button>
-      </nav>
+  // draft is the Brief form's unsaved values, kept so leaving it for the
+  // Questions page doesn't lose what was typed.
+  const openQuestions = (draft) => {
+    if (draft) setBrief(draft)
+    if (view !== 'questions') setQuestionsFrom(view)
+    go('questions')
+  }
 
+  const navCounts = { shortlist: shortlist.length, compare: compareSel.length, questions: answeredCount }
+  const nav = { navCounts, onNavigate: go, onOpenQuestions: openQuestions }
+
+  return (
+    <div className="min-h-full bg-ink">
+      {view === 'landing' && <Landing onProceed={() => go('brief')} />}
       {view === 'brief' && (
-        <Brief initial={brief} onFindNames={findNames} onOpenQuestions={() => setQuestionsOpen(true)} />
+        <Brief
+          initial={brief}
+          onFindNames={findNames}
+          onOpenQuestions={openQuestions}
+          onBack={() => go('landing')}
+        />
       )}
+      {view === 'generating' && <Generating progress={progress} />}
       {view === 'results' && (
         <Results
+          {...nav}
           brief={brief}
           results={results}
-          isChecking={isChecking}
           error={error}
           onRetry={retry}
-          filters={filters}
-          onFiltersChange={setFilters}
+          primaryTld={primaryTld}
+          onPrimaryTldChange={setPrimaryTld}
           shortlist={shortlist}
           compareSel={compareSel}
           pendingQuestion={pendingQuestion !== null ? QUESTIONS[pendingQuestion] : null}
+          regenerating={regenerating}
           onRegenerate={regenerate}
           onToggleShortlist={toggleShortlist}
           onToggleCompare={toggleCompare}
@@ -152,14 +310,25 @@ export default function App() {
         />
       )}
       {view === 'shortlist' && (
-        <Shortlist shortlist={shortlist} onRemove={toggleShortlist} onNavigate={setView} />
+        <Shortlist
+          {...nav}
+          shortlist={shortlist}
+          compareSel={compareSel}
+          onRemove={toggleShortlist}
+          onToggleCompare={toggleCompare}
+        />
       )}
       {view === 'compare' && (
-        <Compare compareSel={compareSel} onRemove={toggleCompare} onNavigate={setView} />
+        <Compare
+          {...nav}
+          compareSel={compareSel}
+          shortlist={shortlist}
+          onRemove={toggleCompare}
+          onToggleShortlist={toggleShortlist}
+        />
       )}
-
-      {questionsOpen && (
-        <QuestionsPanel answers={answers} onSave={saveAnswer} onClose={() => setQuestionsOpen(false)} />
+      {view === 'questions' && (
+        <Questions {...nav} answers={answers} onSave={saveAnswer} onDone={() => go(questionsFrom)} />
       )}
     </div>
   )

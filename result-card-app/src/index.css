@@ -34,7 +34,198 @@
   --color-outline-variant: #cac4d0;
   --color-card-muted: #8a8a8a;
   --color-taken: #c0c0c0;
+
+  /* Landing screen only — from the "Landing Page" design export. Namespaced
+     (hero-*) so these never bleed into the app's own tokens above. */
+  --font-hero: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-hero-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-hero-text: #f7f5ef;
+  --color-hero-fill: #f2f1ed;
+
+  /* Generating screen — card rows scroll one full set of cards (7 × 236px = 1652px)
+     per loop. */
+  --animate-row-scroll-left: row-scroll-left 16s linear infinite;
+  --animate-row-scroll-right: row-scroll-right 16s linear infinite;
+  @keyframes row-scroll-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-1652px);
+    }
+  }
+  @keyframes row-scroll-right {
+    from {
+      transform: translateX(-1652px);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  /* Names list — availability dots/labels. */
+  --color-status-ok: #4ade80;
+  --color-status-bad: #fb7b63;
+
+  /* Every Tailwind `transition` in the app eases with this quint-style
+     ease-out: quick to react, long soft landing. */
+  --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Progress bar — a soft highlight that keeps travelling along the fill so it
+     never looks stalled while we wait on the network. */
+  --animate-sheen: sheen 1.8s linear infinite;
+  @keyframes sheen {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(260%);
+    }
+  }
+
+  /* Brief screen — the slow float on the orb image, from the "Form" design export. */
+  --animate-brief-float: brief-float 6.5s ease-in-out infinite;
+  @keyframes brief-float {
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+      filter: brightness(1.08);
+    }
+    50% {
+      transform: translateY(-7px) scale(1.018);
+      filter: brightness(1.28);
+    }
+  }
 }
 
 html, body, #root { height: 100%; }
-body { margin: 0; background: var(--color-canvas); }
+body { margin: 0; background: var(--color-ink); }
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: rgba(247, 245, 239, 0.85);
+    color: #0a0a0a;
+  }
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid rgba(247, 245, 239, 0.75);
+    outline-offset: 3px;
+  }
+}
+
+/* ── Motion system ─────────────────────────────────────────────────────────
+   .reveal / .reveal-soft: content rises into place on mount. Stagger by
+   setting --i (0, 1, 2…) inline; ~70ms per step. `backwards` fill means no
+   transform is left behind once it finishes (which would trap fixed children
+   and blur glass). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+@keyframes rise-soft {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+    filter: blur(10px);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-swap {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+/* Brief screen: the one-off sheen across "Fill an example", and the small pop
+   when an example picks a TLD. (Outside @theme so they are always emitted.) */
+@keyframes magic-sheen {
+  from {
+    translate: -120% 0;
+  }
+  to {
+    translate: 120% 0;
+  }
+}
+@keyframes pop {
+  40% {
+    transform: scale(1.12);
+  }
+}
+.reveal {
+  animation: rise 800ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(80ms + var(--i, 0) * 70ms);
+}
+.reveal-soft {
+  animation: rise-soft 1000ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(120ms + var(--i, 0) * 90ms);
+}
+.fade-in {
+  animation: fade-in 700ms ease-out backwards;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.fade-swap {
+  animation: fade-swap 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.hero-in {
+  animation: hero-in 1600ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Screen changes (see `go` in App.jsx): the old screen eases out while the new
+   one settles in from a hair larger, so the swap reads as depth rather than a cut.
+   The top bar is pixel-identical between inner screens, so it stays perfectly
+   still through the crossfade. */
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: scale(1.012);
+  }
+}
+::view-transition-group(root) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(root) {
+  animation-name: vt-out;
+}
+::view-transition-new(root) {
+  animation-name: vt-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
