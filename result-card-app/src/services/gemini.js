@@ -1,31 +1,15 @@
+import { buildPrompt, parseNames } from './namePrompt.js'
+
 const GEMINI_MODEL = 'gemini-flash-latest'
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 
-// Ask for more names than the UI shows: duplicates and unusable names get
-// dropped, and we still want a full batch left over.
-export const NAMES_REQUESTED = 14
-
-function buildPrompt(brief, excludeNames) {
-  const lines = [
-    `Suggest ${NAMES_REQUESTED} short, ordinary business name ideas for a brand.`,
-    brief.businessType ? `Type of business: ${brief.businessType}` : null,
-    brief.name ? `Working name so far: ${brief.name}` : null,
-    brief.description ? `Description: ${brief.description}` : null,
-    brief.competitors ? `Competitors/keywords: ${brief.competitors}` : null,
-    brief.mood ? `Nature and mood: ${brief.mood}` : null,
-    brief.answers?.length
-      ? `Brand discovery answers:\n${brief.answers.map(([q, a]) => `- ${q} ${a}`).join('\n')}`
-      : null,
-    excludeNames.length ? `Do not repeat any of these: ${excludeNames.join(', ')}` : null,
-    `Respond with ONLY a JSON array of ${NAMES_REQUESTED} short strings, no other text.`,
-  ].filter(Boolean)
-  return lines.join('\n')
-}
+// The prompt and reply parsing are shared with the Groq backup (namePrompt.js).
+export { NAMES_REQUESTED } from './namePrompt.js'
 
 const REQUEST_TIMEOUT_MS = 12000
 
 export async function generateNames(brief, excludeNames = []) {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+  const apiKey = import.meta.env?.VITE_GEMINI_API_KEY
   let res
   try {
     res = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
@@ -74,18 +58,5 @@ export async function generateNames(brief, excludeNames = []) {
     .filter((p) => !p.thought)
     .map((p) => p.text || '')
     .join('')
-  const match = text.match(/\[[\s\S]*\]/)
-  if (!match) throw new Error("Couldn't parse name ideas from Gemini's response.")
-
-  let names
-  try {
-    names = JSON.parse(match[0])
-  } catch {
-    throw new Error("Couldn't parse name ideas from Gemini's response.")
-  }
-  if (!Array.isArray(names) || names.length === 0) {
-    throw new Error('Gemini returned no name ideas.')
-  }
-
-  return names.slice(0, NAMES_REQUESTED).map((n) => String(n).trim()).filter(Boolean)
+  return parseNames(text)
 }
