@@ -9,6 +9,20 @@ export const QUESTIONS = [
   "What role in people's lives are you trying to fill?",
 ]
 
+// One example answer per question, shown as the placeholder in its text box.
+// Same order as QUESTIONS. They are meant to show the kind of specific, vivid
+// answer that steers the names, not to be copied.
+export const QUESTION_PLACEHOLDERS = [
+  'e.g. Calm and unhurried, like the first sip of coffee on a slow Sunday morning',
+  'e.g. Book a class, buy a bag of beans, join the monthly subscription',
+  'e.g. A snow leopard: quiet, precise, hard to spot, worth the trip',
+  'e.g. A neighbourhood library, a tailor, a relay race, a well-run kitchen',
+  'e.g. We turn tiny seeds into yummy drinks, and you get to watch how it happens',
+  'e.g. Wine calls it "terroir", bakers call it "crumb", musicians call it "tone"',
+  'e.g. A lighthouse for freelancers, a compass, a workbench, a trellis',
+  'e.g. The friendly regular spot between home and work',
+]
+
 export const INITIAL_BRIEF = {
   businessType: '',
   name: '',

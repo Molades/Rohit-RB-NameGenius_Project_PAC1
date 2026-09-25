@@ -28,6 +28,7 @@ export default function Results({
   onNavigate,
   onOpenQuestions,
   pendingQuestion,
+  pendingPlaceholder,
   regenerating,
   onRegenerate,
   onToggleShortlist,
@@ -119,7 +120,7 @@ export default function Results({
             value={answerDraft}
             onChange={(e) => setAnswerDraft(e.target.value)}
             rows={2}
-            placeholder="Answer to sharpen the next batch..."
+            placeholder={pendingPlaceholder || 'Answer to sharpen the next batch...'}
             aria-label="Your answer"
             className={`${PILL_FIELD} min-h-[68px] resize-y rounded-[34px] field-sizing-content`}
           />
