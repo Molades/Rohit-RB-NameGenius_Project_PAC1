@@ -7,8 +7,8 @@ import Results from './screens/Results.jsx'
 import Shortlist from './screens/Shortlist.jsx'
 import Compare from './screens/Compare.jsx'
 import Questions from './screens/Questions.jsx'
-import { INITIAL_BRIEF, QUESTIONS } from './data.js'
-import { generateNames } from './services/gemini.js'
+import { INITIAL_BRIEF, QUESTIONS, QUESTION_PLACEHOLDERS } from './data.js'
+import { generateNames } from './services/names.js'
 import { slugify, checkDomainsBatch, TLDS } from './services/domain.js'
 import { preloadPrices } from './services/pricing.js'
 
@@ -75,6 +75,14 @@ export default function App() {
 
   const answeredCount = answeredPairs(answers).length
 
+  // The answers the newest names were generated with (as JSON), so we can tell
+  // when the user has answered something since — see answersPending below.
+  const usedAnswers = useRef('[]')
+  const answersPending = () => {
+    const pairs = answeredPairs(answers)
+    return pairs.length > 0 && JSON.stringify(pairs) !== usedAnswers.current
+  }
+
   const firstUnanswered = (a) => {
     const idx = QUESTIONS.findIndex((_, i) => !(a[i] || '').trim())
     return idx === -1 ? null : idx
@@ -97,13 +105,15 @@ export default function App() {
     }, 120)
 
     let names
+    const pairs = answeredPairs(answersRef.current)
     try {
-      names = await generateNames({ ...activeBrief, answers: answeredPairs(answersRef.current) }, excludeNames)
+      names = await generateNames({ ...activeBrief, answers: pairs }, excludeNames)
+      usedAnswers.current = JSON.stringify(pairs)
     } catch (err) {
       if (current()) {
         setError(
           err.code === 'QUOTA_EXCEEDED'
-            ? 'Daily Gemini limit reached — try again tomorrow.'
+            ? 'Daily name-generation limit reached — try again tomorrow.'
             : 'Could not generate names. Try again.'
         )
       }
@@ -216,8 +226,10 @@ export default function App() {
   // "Regenerate more" stays on the Names list: the button shows its own busy
   // state, and the new names are appended below when they arrive. A failure
   // leaves the list as it was and shows the error banner (with Try again).
-  const regenerate = async () => {
-    if (pendingQuestion !== null || regenerating) return
+  // `countAsRegen` is false when the refresh comes from answering the brand
+  // questions, which shouldn't count towards the "3 regenerates, then a question".
+  const regenerateInPlace = async ({ countAsRegen = true } = {}) => {
+    if (regenerating) return
     const run = ++genRun.current
     setRegenerating(true)
     const startedAt = Date.now()
@@ -230,10 +242,29 @@ export default function App() {
     if (genRun.current !== run) return
     if (batch) {
       commitBatch(batch)
-      noteRegeneration()
+      if (countAsRegen) noteRegeneration()
     }
     setRegenerating(false)
   }
+
+  const regenerate = () => {
+    if (pendingQuestion === null) regenerateInPlace()
+  }
+
+  // Answering brand questions should visibly change the names. When the user
+  // leaves the Questions page for the Names list with answers the current names
+  // were not built from, refresh them in place — the "Regenerating" button shows
+  // it, and the new names arrive below the old ones. (Leaving for the Brief form
+  // needs nothing: Find names uses the answers.) A follow-up question answered
+  // here no longer needs asking on the Names list.
+  const previousView = useRef(view)
+  useEffect(() => {
+    const from = previousView.current
+    previousView.current = view
+    if (from !== 'questions' || view !== 'results') return
+    if (pendingQuestion !== null && (answers[pendingQuestion] || '').trim()) setPendingQuestion(null)
+    if (results.length > 0 && answersPending()) regenerateInPlace({ countAsRegen: false })
+  }, [view])
 
   const registerSelection = () => setRegenCount(0)
 
@@ -274,6 +305,9 @@ export default function App() {
     go('questions')
   }
 
+  // Leaving Questions would refresh the names (see the effect above).
+  const refreshesNames = questionsFrom !== 'brief' && results.length > 0 && answersPending()
+
   const navCounts = { shortlist: shortlist.length, compare: compareSel.length, questions: answeredCount }
   const nav = { navCounts, onNavigate: go, onOpenQuestions: openQuestions }
 
@@ -301,6 +335,7 @@ export default function App() {
           shortlist={shortlist}
           compareSel={compareSel}
           pendingQuestion={pendingQuestion !== null ? QUESTIONS[pendingQuestion] : null}
+          pendingPlaceholder={pendingQuestion !== null ? QUESTION_PLACEHOLDERS[pendingQuestion] : undefined}
           regenerating={regenerating}
           onRegenerate={regenerate}
           onToggleShortlist={toggleShortlist}
@@ -328,7 +363,13 @@ export default function App() {
         />
       )}
       {view === 'questions' && (
-        <Questions {...nav} answers={answers} onSave={saveAnswer} onDone={() => go(questionsFrom)} />
+        <Questions
+          {...nav}
+          answers={answers}
+          onSave={saveAnswer}
+          refreshesNames={refreshesNames}
+          onDone={() => go(refreshesNames ? 'results' : questionsFrom)}
+        />
       )}
     </div>
   )

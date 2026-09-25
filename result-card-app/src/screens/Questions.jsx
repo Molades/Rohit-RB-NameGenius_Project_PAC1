@@ -1,9 +1,9 @@
 import { useId } from 'react'
 import TopBar from '../components/TopBar.jsx'
 import { BOTTOM_FADE, FILL_BTN, FLOAT_BAR, PAGE_H1, PANEL, PILL_FIELD } from '../components/ui.js'
-import { QUESTIONS } from '../data.js'
+import { QUESTIONS, QUESTION_PLACEHOLDERS } from '../data.js'
 
-function QuestionCard({ index, question, value, onChange }) {
+function QuestionCard({ index, question, placeholder, value, onChange }) {
   const id = useId()
   const answered = value.trim() !== ''
   return (
@@ -28,14 +28,14 @@ function QuestionCard({ index, question, value, onChange }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={2}
-        placeholder="Answer (optional)"
+        placeholder={placeholder}
         className={`${PILL_FIELD} min-h-[68px] resize-y rounded-[34px] field-sizing-content`}
       />
     </section>
   )
 }
 
-export default function Questions({ answers, onSave, onDone, navCounts, onNavigate, onOpenQuestions }) {
+export default function Questions({ answers, onSave, onDone, refreshesNames, navCounts, onNavigate, onOpenQuestions }) {
   const answeredCount = QUESTIONS.filter((_, i) => (answers[i] || '').trim()).length
   const percent = (answeredCount / QUESTIONS.length) * 100
 
@@ -72,14 +72,26 @@ export default function Questions({ answers, onSave, onDone, navCounts, onNaviga
 
       <div className="grid grid-cols-1 gap-5 px-6 pb-[120px] pt-6 sm:px-14 lg:grid-cols-2">
         {QUESTIONS.map((q, i) => (
-          <QuestionCard key={q} index={i} question={q} value={answers[i] || ''} onChange={(v) => onSave(i, v)} />
+          <QuestionCard
+            key={q}
+            index={i}
+            question={q}
+            placeholder={QUESTION_PLACEHOLDERS[i]}
+            value={answers[i] || ''}
+            onChange={(v) => onSave(i, v)}
+          />
         ))}
       </div>
 
       <div aria-hidden="true" className={BOTTOM_FADE} />
       <div style={{ '--i': 7 }} className={`${FLOAT_BAR} reveal`}>
+        {refreshesNames && (
+          <span className="fade-swap hidden pl-3 pr-1 text-[13px] text-hero-text/60 sm:block">
+            Your answers will shape a fresh batch of names.
+          </span>
+        )}
         <button type="button" onClick={onDone} className={FILL_BTN}>
-          Done
+          {refreshesNames ? 'Update names' : 'Done'}
         </button>
       </div>
     </main>
