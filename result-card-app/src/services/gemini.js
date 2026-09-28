@@ -1,3 +1,9 @@
+// SERVER ONLY — holds the Gemini API key, so this must never be imported by
+// client code (nothing under src/ other than names.js may import it). The
+// browser reaches this indirectly through /api/generate-names: see
+// api/generate-names.js (production) and the dev-server middleware in
+// vite.config.js (local `npm run dev`), both of which call names.js, which
+// calls this.
 import { buildPrompt, parseNames } from './namePrompt.js'
 
 const GEMINI_MODEL = 'gemini-flash-latest'
@@ -9,7 +15,7 @@ export { NAMES_REQUESTED } from './namePrompt.js'
 const REQUEST_TIMEOUT_MS = 12000
 
 export async function generateNames(brief, excludeNames = []) {
-  const apiKey = import.meta.env?.VITE_GEMINI_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY
   let res
   try {
     res = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {

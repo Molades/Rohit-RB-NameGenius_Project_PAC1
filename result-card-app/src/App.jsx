@@ -8,7 +8,7 @@ import Shortlist from './screens/Shortlist.jsx'
 import Compare from './screens/Compare.jsx'
 import Questions from './screens/Questions.jsx'
 import { INITIAL_BRIEF, QUESTIONS, QUESTION_PLACEHOLDERS } from './data.js'
-import { generateNames } from './services/names.js'
+import { generateNames } from './services/names.client.js'
 import { slugify, checkDomainsBatch, TLDS } from './services/domain.js'
 import { preloadPrices } from './services/pricing.js'
 
