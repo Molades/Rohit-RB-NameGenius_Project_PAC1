@@ -1,110 +1,147 @@
-import { useState } from 'react'
-import handsUrl from '../assets/hero-hands.png'
+import { useEffect, useRef, useState } from 'react'
 
-// Hand centres/radii as a share of the image itself (not the viewport), so the
-// hover reveal stays on the hands however the image is cropped.
-const REVEAL_MASK =
-  'radial-gradient(ellipse 23.75% 42.2% at 22.5% 39.7%, #000 55%, transparent 100%), radial-gradient(ellipse 20% 35.6% at 76.25% 59.6%, #000 55%, transparent 100%)'
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-function StarMark() {
+// The copy leaves as the hands start to move: it fades, softens and lifts away.
+const leaving = (playing) =>
+  `transition-[opacity,filter,translate] duration-[750ms] ease-[cubic-bezier(0.33,0,0.2,1)] motion-reduce:transition-none ${
+    playing ? 'pointer-events-none -translate-y-2 opacity-0 blur-[6px]' : ''
+  }`
+
+function ProceedButton({ onClick, className = '' }) {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 2 L14.3 9.7 L22 12 L14.3 14.3 L12 22 L9.7 14.3 L2 12 L9.7 9.7 Z" fill="currentColor" />
-    </svg>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-hero-fill font-hero-mono text-[14px] font-semibold text-ink transition-[translate,background-color] duration-[250ms] hover:-translate-y-px hover:bg-white ${className}`}
+    >
+      Proceed <span aria-hidden="true">→</span>
+    </button>
   )
 }
 
-function ArrowIcon() {
+// Decorative for now — no action wired up yet, same as on every other screen's nav.
+function ContactUs({ className = '' }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M3 8H13M13 8L9 4M13 8L9 12"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <button
+      type="button"
+      className={`inline-flex cursor-pointer items-center rounded-full border border-white/40 font-meta text-[13px] tracking-[0.03em] text-hero-text transition duration-200 hover:-translate-y-px hover:border-white/65 hover:bg-white/8 active:translate-y-0 active:scale-95 ${className}`}
+    >
+      Contact Us
+    </button>
   )
 }
 
+// Home page. Two hands drawn in type (◆ where light falls, · in shadow) rest
+// apart like the "Creation of Adam"; Proceed plays a handshake, then moves on
+// to the Brief form once it settles. Clicking or pressing Enter, Space or
+// Escape during the handshake skips straight to the form. Without WebGL, or
+// with reduced motion, Proceed goes straight there.
 export default function Landing({ onProceed }) {
-  const [reach, setReach] = useState(false)
+  const canvasRef = useRef(null)
+  const hands = useRef(null) // the 3D scene, once its model has loaded
+  const [ready, setReady] = useState(false)
+  const [playing, setPlaying] = useState(false)
 
-  const trackGlow = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`)
-    e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`)
-  }
+  // Move on once, however many ways the user (or the animation) asks to.
+  const onProceedRef = useRef(onProceed)
+  onProceedRef.current = onProceed
+  const left = useRef(false)
+  const proceed = useRef(() => {
+    if (left.current) return
+    left.current = true
+    onProceedRef.current()
+  }).current
 
-  const resetGlow = (e) => {
-    e.currentTarget.style.removeProperty('--mx')
-    e.currentTarget.style.removeProperty('--my')
-    setReach(false)
+  // Three.js loads only with this page, so the rest of the app never carries it.
+  useEffect(() => {
+    let live = true
+    let scene = null
+    import('../components/handshakeScene.js')
+      .then(({ createHandshake }) => {
+        if (!live) return
+        scene = createHandshake(canvasRef.current, {
+          modelUrl: `${import.meta.env.BASE_URL}models/hand-right.glb`,
+          onReady: () => {
+            if (!live) return
+            hands.current = scene
+            setReady(true)
+          },
+          onDone: () => live && proceed(),
+        })
+      })
+      .catch(() => {}) // no WebGL: the page works without the hands
+    return () => {
+      live = false
+      hands.current = null
+      scene?.dispose()
+    }
+  }, [])
+
+  // During the handshake, a click or Enter/Space/Escape skips to the form. Added
+  // a tick later so the click that started the handshake doesn't count.
+  useEffect(() => {
+    if (!playing) return
+    const skip = (e) => {
+      if (e.type === 'keydown' && !['Enter', ' ', 'Escape'].includes(e.key)) return
+      proceed()
+    }
+    const id = setTimeout(() => {
+      window.addEventListener('click', skip)
+      window.addEventListener('keydown', skip)
+    })
+    return () => {
+      clearTimeout(id)
+      window.removeEventListener('click', skip)
+      window.removeEventListener('keydown', skip)
+    }
+  }, [playing])
+
+  const start = () => {
+    if (playing) return
+    if (!hands.current || prefersReducedMotion()) {
+      proceed()
+      return
+    }
+    setPlaying(true)
+    hands.current.play()
   }
 
   return (
-    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-black">
-      <div
+    <main className="relative h-dvh min-h-[560px] overflow-hidden bg-ink text-hero-text">
+      <canvas
+        ref={canvasRef}
         aria-hidden="true"
-        className="hero-in absolute left-1/2 top-[40%] aspect-video -translate-x-1/2 -translate-y-[40%]"
-        style={{ width: 'max(100%, min(177.78dvh, 200%))' }}
-      >
-        <div
-          className="absolute inset-0 bg-[length:100%_100%] brightness-[0.55] saturate-[0.6]"
-          style={{ backgroundImage: `url(${handsUrl})` }}
-        />
-        <div
-          className={`absolute inset-0 bg-[length:100%_100%] brightness-[1.3] saturate-[1.05] transition-opacity duration-700 ease-in-out motion-reduce:transition-none ${reach ? 'opacity-100' : 'opacity-0'}`}
-          style={{ backgroundImage: `url(${handsUrl})`, WebkitMaskImage: REVEAL_MASK, maskImage: REVEAL_MASK }}
-        />
-      </div>
-
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[radial-gradient(ellipse_60%_46%_at_50%_46%,rgba(0,0,0,0.4)_0%,rgba(0,0,0,0)_70%)]"
+        className={`absolute inset-0 block size-full transition-opacity duration-1000 ease-out ${ready ? 'opacity-100' : 'opacity-0'}`}
       />
 
-      <div style={{ '--i': 6 }} className="fade-in absolute left-6 top-8 z-10 flex items-center gap-2.5 text-hero-text sm:left-14">
-        <StarMark />
-        <span className="font-hero-mono text-[15px] font-semibold tracking-[0.14em]">INGENIO</span>
-      </div>
-      <button
-        type="button"
-        style={{ '--i': 7 }}
-        className="fade-in absolute right-6 top-8 z-10 inline-flex cursor-pointer items-center rounded-full border border-white/40 px-[22px] py-2.5 font-meta text-[13px] tracking-[0.03em] text-hero-text transition duration-200 hover:-translate-y-px hover:border-white/65 hover:bg-white/8 active:translate-y-0 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:right-14"
-      >
-        Contact Us
-      </button>
-
-      <div className="relative z-10 flex flex-col items-center gap-10 px-6 text-center sm:px-16">
-        <h1 style={{ '--i': 1 }} className="reveal-soft max-w-[900px] font-hero text-[44px] font-normal italic leading-[1.08] text-hero-text text-balance sm:text-[64px] lg:text-[78px]">
-          Great names, minus the guesswork.
-          <span className="mt-3.5 block text-[24px] text-hero-text/60 sm:text-[32px] lg:text-[40px]">
-            Unique, available, yours.
+      <header className={`absolute inset-x-0 top-0 z-10 flex items-center justify-between px-[22px] pt-6 min-[900px]:px-[78px] min-[900px]:pt-10 ${leaving(playing)}`}>
+        <span aria-hidden="true" className="flex w-9 flex-col items-start gap-[7px]">
+          <span className="block h-0.5 w-9 bg-[#9a9a97]" />
+          <span className="block h-0.5 w-6 bg-[#9a9a97]" />
+        </span>
+        <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-2 font-hero-mono text-[15px] font-medium tracking-[0.14em] text-[#d8d6d0] min-[900px]:flex">
+          <span aria-hidden="true" className="text-[17px] text-hero-text">
+            ✦
           </span>
-        </h1>
+          INGENIO
+        </div>
+        <ContactUs className="px-[18px] py-2.5 min-[900px]:px-[22px]" />
+      </header>
 
-        <button
-          type="button"
-          onClick={onProceed}
-          onMouseEnter={() => setReach(true)}
-          onMouseMove={trackGlow}
-          onMouseLeave={resetGlow}
-          onFocus={() => setReach(true)}
-          onBlur={() => setReach(false)}
-          style={{ '--i': 5 }}
-          className="reveal group relative inline-flex cursor-pointer items-center overflow-hidden rounded-full border border-white/40 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0.04)_60%,rgba(0,0,0,0.12))] px-[34px] py-[17px] font-meta text-[16px] font-semibold tracking-[0.01em] text-hero-text shadow-[inset_0_1px_0_rgba(255,255,255,0.45),inset_0_-1px_12px_rgba(255,255,255,0.05),0_8px_28px_rgba(0,0,0,0.35)] backdrop-blur-[18px] backdrop-saturate-[1.6] transition duration-200 hover:-translate-y-px hover:border-white/65 hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.3),rgba(255,255,255,0.06)_60%,rgba(0,0,0,0.14))] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_14px_rgba(255,255,255,0.08),0_10px_34px_rgba(0,0,0,0.4)] active:translate-y-0 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+      <div className="pointer-events-none absolute inset-x-0 top-[13vh] z-10 flex flex-col items-center gap-[22px] min-[900px]:top-[15vh]">
+        <h1
+          className={`m-0 flex flex-col px-[22px] text-center font-hero text-[clamp(36px,10vw,56px)] font-normal italic leading-[1.04] tracking-[-0.02em] min-[900px]:px-0 min-[900px]:text-[clamp(44px,5.4vw,84px)] ${leaving(playing)}`}
         >
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120px_circle_at_var(--mx,50%)_var(--my,50%),rgba(255,255,255,0.55),rgba(255,255,255,0.08)_55%,transparent_75%)] opacity-0 transition-opacity duration-[250ms] group-hover:opacity-100"
-          />
-          <span className="relative inline-flex items-center gap-2.5">
-            <span>Proceed</span>
-            <ArrowIcon />
-          </span>
-        </button>
+          <em className="text-[#7a7a76]">Find a name that fits</em>
+          <span>your vision</span>
+        </h1>
+        <div className={`pointer-events-auto flex w-[min(470px,calc(100%-44px))] flex-col items-center gap-5 text-center ${leaving(playing)}`}>
+          <p className="m-0 font-meta text-[16px] leading-normal text-[#8d8d8a] min-[900px]:text-[18px]">
+            Explore, generate, claim — a name that turns your idea into a brand people remember.
+          </p>
+          <ProceedButton onClick={start} className="px-7 py-[15px]" />
+        </div>
       </div>
     </main>
   )
