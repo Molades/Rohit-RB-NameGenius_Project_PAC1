@@ -1,8 +1,13 @@
+// SERVER ONLY — orchestrates the two provider calls, both of which hold API
+// keys (see their header comments). Client code imports names.client.js
+// instead, which reaches this over HTTP: api/generate-names.js calls it
+// directly in production, and the dev-server middleware in vite.config.js
+// calls it for local `npm run dev`.
 import { generateNames as generateWithGemini } from './gemini.js'
 import { generateNamesGroq, hasGroqKey } from './groq.js'
 
 // The one entry point the app uses for name ideas: Gemini first, and if that
-// fails, Groq (when a VITE_GROQ_API_KEY is configured). With no Groq key this
+// fails, Groq (when a GROQ_API_KEY is configured). With no Groq key this
 // is exactly the old Gemini-only behaviour.
 //
 // After Gemini fails it is skipped for a while, so the next Generate goes

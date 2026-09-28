@@ -1,3 +1,6 @@
+// SERVER ONLY — holds the Groq API key, so this must never be imported by
+// client code. See the header comment in gemini.js for how the browser
+// reaches this indirectly.
 import { buildPrompt, parseNames } from './namePrompt.js'
 
 // Backup name generator, used only when Gemini fails (see names.js). Groq's
@@ -5,13 +8,13 @@ import { buildPrompt, parseNames } from './namePrompt.js'
 //
 // Groq retires models without much notice (llama-3.1-8b-instant, which the
 // vanilla prototype still uses, is already gone). If the backup starts failing
-// with "model does not exist" in the console, set VITE_GROQ_MODEL in .env to
+// with "model does not exist" in the console, set GROQ_MODEL in .env to
 // one from https://api.groq.com/openai/v1/models rather than editing code.
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
 const DEFAULT_MODEL = 'openai/gpt-oss-20b'
 const REQUEST_TIMEOUT_MS = 10000
 
-const envKey = () => (import.meta.env?.VITE_GROQ_API_KEY || '').trim()
+const envKey = () => (process.env.GROQ_API_KEY || '').trim()
 
 // True when a Groq key is configured. With no key, the backup is simply off.
 export const hasGroqKey = () => envKey() !== ''
@@ -19,7 +22,7 @@ export const hasGroqKey = () => envKey() !== ''
 // `options` exists so the service can be exercised without a real key.
 export async function generateNamesGroq(brief, excludeNames = [], options = {}) {
   const apiKey = options.apiKey ?? envKey()
-  const model = options.model ?? (import.meta.env?.VITE_GROQ_MODEL || DEFAULT_MODEL)
+  const model = options.model ?? (process.env.GROQ_MODEL || DEFAULT_MODEL)
   if (!apiKey) throw new Error('No Groq API key configured.')
 
   let res
