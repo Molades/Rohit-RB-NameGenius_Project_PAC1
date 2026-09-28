@@ -146,12 +146,6 @@ body { margin: 0; background: var(--color-ink); }
     transform: translateY(6px);
   }
 }
-@keyframes hero-in {
-  from {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-}
 /* Brief screen: the one-off sheen across "Fill an example", and the small pop
    when an example picks a TLD. (Outside @theme so they are always emitted.) */
 @keyframes magic-sheen {
@@ -181,9 +175,6 @@ body { margin: 0; background: var(--color-ink); }
 }
 .fade-swap {
   animation: fade-swap 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
-}
-.hero-in {
-  animation: hero-in 1600ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 /* Screen changes (see `go` in App.jsx): the old screen eases out while the new

@@ -1,0 +1,6 @@
+hand-right.glb — the "generic-hand" profile (right.glb) from @webxr-input-profiles/assets 1.0.20
+Source: https://github.com/immersive-web/webxr-input-profiles (packages/assets/profiles/generic-hand)
+
+Copyright © W3C and contributors to the Immersive Web Working Group.
+Licensed under the W3C Software and Document License:
+https://www.w3.org/Consortium/Legal/copyright-software
